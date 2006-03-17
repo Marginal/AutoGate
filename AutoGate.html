@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta content="Animated boarding bridge and docking guidance system for X-Plane scenery package developers">
+  <meta content="X-Plane, simulator, scenery" name="keywords">
+  <title>AutoGate</title>
+  <meta content="Jonathan Harris" name="author">
+  <style type="text/css">
+.banner { font-family: Arial,Helvetica,sans-serif; background-color: lightskyblue; text-align: left; height: 32px; }
+.dnl { font-family: Arial,Helvetica,sans-serif; font-size: small; background-color: lightskyblue; }
+samp { font-family: Arial,Helvetica,sans-serif; }
+h2 { font-family: Arial,Helvetica,sans-serif; }
+h3 { font-family: Arial,Helvetica,sans-serif; }
+h4 { font-family: Arial,Helvetica,sans-serif; }
+h5 { font-family: Arial,Helvetica,sans-serif; }
+  </style>
+</head>
+<body>
+<table style="width: 100%;" border="0" cellpadding="2">
+  <tbody>
+    <tr>
+      <td class="banner">Marginal &raquo; <a href="http://marginal.org.uk/x-planescenery/">X-Plane
+Scenery</a> &raquo; <a href="http://marginal.org.uk/x-planescenery/tools.html">Tools</a>
+&raquo; AutoGate</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>AutoGate boarding bridge and docking guidance system kit
+for X-Plane<small><sup>&reg;</sup></small></h2>
+<h3>Overview</h3>
+<p>This kit allows X-Plane scenery designers to add animated
+boarding bridges and docking guidance systems (DGS) to scenery
+packages. One boarding bridge and one DGS (a Safedock<small><sup>&reg;</sup></small>
+2S) are supplied.</p>
+<p>The boarding bridge animates to "dock" with the plane's main
+door when the pilot shuts down the plane's engines with the plane
+within &frac12;m of the correct stopping position. The
+(optional) DGS guides the pilot to the correct stopping position. A
+summary of the Safedock<small><sup>&reg;</sup></small>
+2S DGS is provided <a href="Safedock%20Pilot%20Instructions.html" target="_blank">here</a>.</p>
+<h3>How it works</h3>
+<p>The boarding bridge and DGS scenery objects are animated using
+X-Plane custom datarefs. The values of these datarefs are supplied by a
+plugin. The plugin needs to know the location of the main door on the
+plane that the user is flying; the plugin currently only knows this for
+some planes, including the default United 747.</p>
+<p>The system is designed so that it imposes no more load on
+X-Plane than normal "static" scenery objects unless the user's
+viewpoint is within 1000m of a boarding bridge or 500m of a DGS, in
+which case the load remains very modest.</p>
+<p>If the plugin is not installed or if the user is piloting an
+unrecognised plane then the DGS will stay blank and the boarding bridge
+will stay in the undocked position.</p>
+<h3>Usage</h3>
+<p>Copy the plugin from the <code>plugins</code>
+folder to your <code>X-Plane/Resources/plugins</code>
+folder. Please do not re-distribute the plugin with your scenery
+package; ask your users to download it from <a href="http://marginal.org.uk/x-planescenery/AutoGate.zip">http://marginal.org.uk/x-planescenery/AutoGate.zip</a>
+instead. This ensures that they have the latest version. <small>(Future
+versions of the plugin may support more bridges and/or DGSs, but will
+will remain backwards-compatible)</small>. That download does not
+contain any documentation on the operation of the boarding bridge or
+DGS - you may wish to supply such documentation with your
+scenery package.
+</p>
+<p>The boarding bridge object is <code>AutoGate.obj</code>.
+A static v7 version of this object is supplied in the <code>v7objs</code>
+folder for use in X-Plane v7 WorldMaker. Place as many copies of <code>AutoGate.obj</code>
+as you like in your scenery:</p>
+<ul>
+  <li>The bridge should be placed with the heading that
+you want the plane to have when it stops at the gate.</li>
+  <li>Do not place bridges with their origins within 20m of each
+other. For reference, the distance between the "elbow" and "wrist" is
+20m and the distance between the extended centreline and the "elbow" is
+10m.</li>
+</ul>
+<p>Various versions of the DGS object are provided, eg <code>Safedock2S-6m.obj</code>.
+These differ only in the height of the DGS above the ground. Static v7
+versions of these objects are supplied in the <code>v7objs</code>
+folder. (Use of the DGS is optional - the boarding bridge works fine
+without it - but it will be hard for the pilot to correctly position
+her plane if you don't include a DGS).</p>
+<ul>
+  <li>Place at most one DGS at each boarding bridge.</li>
+  <li>The DGS will remain blank or will display incorrect
+information if it is not placed next to a boarding bridge.</li>
+  <li>For correct operation, the DGS must be placed within the
+highlighted region behind the bridge's "elbow":</li>
+</ul>
+<div style="margin-left: 80px;"><img style="width: 362px; height: 270px;" alt="placement of GDS" src="imgs/GDSplacement.png"></div>
+<h3>Customisation</h3>
+<p>You can rename the objects and have multiple versions with
+different file names (but the rules above still apply irrespective of
+the objects' names).</p>
+<p>You can change the following things about the boarding
+bridge(s) without breaking the system:</p>
+<ul>
+  <li>You can re-texture the boarding bridge. As supplied, it
+shares a bitmap (<code>AutoGate.png</code>) with the
+Safedock DGS. The highlighted region is not used by the DGS. Or you can
+use a different bitmap file for the boarding bridge(s).</li>
+</ul>
+<div style="margin-left: 80px;"><img style="width: 384px; height: 192px;" alt="Texture layout" src="imgs/texlayout.png"><br>
+<small>(this image has been rotated and reduced in size from the
+original)</small></div>
+<ul>
+  <li>You can remove or change the centreline quad. However the
+plugin
+expects the centreline to be along the line x=0 and you can't change
+this behaviour.</li>
+  <li>You can make any changes you like to the "upper arm" and
+"elbow". You can't change the <u>location</u> of the
+"elbow".</li>
+  <li>You can change the appearance of parts of the boarding
+bridge below the "elbow" but with the following constraints:</li>
+  <ul>
+    <li>Don't change the animations (Armature location and poses
+in Blender) at all.</li>
+    <li>The plugin expects that the floor of the doorway is 4m
+above the ground when the object is at rest (animation frame 1 in
+Blender).</li>
+    <li>The plugin expects that that the edge of the doorway is
+20m south and 7.5m west of an unrotated object's origin when
+the object is at rest (animation frame 1 in Blender).</li>
+  </ul>
+  <li>As supplied, the boarding bridge includes a static reduced
+level-of-detail version for distances above 1000m (in Blender this is
+in Layer 2). You should retain this feature to reduce the
+load on X-Plane.</li>
+</ul>
+<p>If you use Blender then use the supplied <code>AutoGate.blend</code> file as a starting point since importing <code>AutoGate.obj</code>
+will cause the animation to be lost. If you use another 3D modelling
+application then check that it can correctly import and re-export <code>AutoGate.obj</code> (including animations) before you spend a lot of time editing.</p>
+<p>The Safesock2S is not designed to be customisable. Contact the
+<a href="mailto:x-plane@marginal.org.uk">author</a>
+if you want to use a different kind of DGS.</p>
+<h3>Acknowledgements</h3>
+<p>&ldquo;X-Plane&rdquo; is a registered trademark of
+<a href="http://www.x-plane.com/">Laminar Research</a>.</p>
+<p>&ldquo;Safedock&rdquo; is a registered trademark of <a href="http://www.safegate.com/">Safegate group</a>.
+Safegate group is not associated with and does not endorse this scenery
+kit.</p>
+<hr>
+<table style="width: 100%;" border="0" cellpadding="2">
+  <tbody>
+    <tr>
+      <td class="banner">Alpha 0.1 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
+      <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img style="border: 0px solid ; width: 88px; height: 31px;" alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.png"></a><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!--/Creative Commons License-->
+<!-- <rdf:RDF xmlns="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> <Work rdf:about=""> <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" /> <dc:type rdf:resource="http://purl.org/dc/dcmitype/InteractiveResource" /> </Work> <License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/"><permits rdf:resource="http://web.resource.org/cc/Reproduction"/><permits rdf:resource="http://web.resource.org/cc/Distribution"/><requires rdf:resource="http://web.resource.org/cc/Notice"/><requires rdf:resource="http://web.resource.org/cc/Attribution"/><permits rdf:resource="http://web.resource.org/cc/DerivativeWorks"/><requires rdf:resource="http://web.resource.org/cc/ShareAlike"/></License></rdf:RDF> -->
+</body>
+</html>
