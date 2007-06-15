@@ -40,20 +40,27 @@ within &frac12;m of the correct stopping position. The
 <h3>How it works</h3>
 <p>The boarding bridge and DGS scenery objects are animated using
 X-Plane custom datarefs. The values of these datarefs are supplied by a
-plugin.</p>
-<p>The plugin needs to know the location of the main door on the
-plane that the user is flying; the plugin currently only knows this for
-some planes, including the default United 747. If the plugin is not
-installed or if the user is piloting an unrecognised plane then the DGS
-will stay blank and the boarding bridge will stay in the undocked
-position.</p>
+plugin. The plugin needs to know the location of the main boarding door on
+the plane that the user is piloting and, if the plane is an Airbus or Boeing,
+the type of the plane.</p>
+<ul>
+  <li>In X-Plane 8.50 and later the plugin reads this information from
+the "boarding door location" and "ICAO code" values in the ACF file.
+These values can be edited on the Standard &raquo; Viewpoint screen in
+Plane-Maker.</li>
+  <li>The plugin also contains hard-coded values for
+a few planes, including the default United 747.</li>
+</ul>
+<p>If the plugin is not installed or if the plugin cannot determine the
+location of the main boarding door then the DGS will stay blank and the
+boarding bridge will stay in the undocked position.</p>
 <p>The system is designed so that it imposes no more load on
 X-Plane than normal "static" scenery objects unless the user's
 viewpoint is within 1000m of a boarding bridge or 500m of a DGS, in
 which case the load remains very modest.</p>
 <h3>Usage</h3>
-<p>Copy <code>AutoGateWin.xpl</code> or <code>AutoGateMac.xpl</code>
-from the <code>plugins</code> folder to your
+<p>Copy one of <code>AutoGateLinux.xpl</code>, <code>AutoGateMac.xpl</code> or
+<code>AutoGateWin.xpl</code> from the <code>plugins</code> folder to your
 <code>X-Plane/Resources/plugins</code>
 folder. Please do not re-distribute the plugins with your scenery
 package; ask your users to download them from
@@ -69,9 +76,7 @@ as a starting point.
 </p>
 <p>The boarding bridge object and bitmap file are
 <code>AutoGate.obj</code> and <code>AutoGate.png</code> in the
-<code>v8objs</code> folder.
-A static v7 version of this object is supplied in the <code>v7objs</code>
-folder for use in v7 WorldMaker. Place as many copies of
+<code>objs</code> folder. Place as many copies of
 <code>AutoGate.obj</code> as you like in your scenery:</p>
 <ul>
   <li>The bridge should be placed with the heading that
@@ -92,10 +97,9 @@ These were installed at airports up to year 2000.</li>
 These were first installed at airports around year 2000.</li>
 </ol>
 <p>Various versions of these DGS objects are supplied in the
-<code>v8objs</code> folder, eg <code>Safedock2S-6m.obj</code>.
+<code>objs</code> folder, eg <code>Safedock2S-6m.obj</code>.
 These differ in the height of the DGS above the ground and whether
-the DGS is mounted on a pole. Static v7 versions of these objects
-are supplied in the <code>v7objs</code> folder for use in v7 WorldMaker.
+the DGS is mounted on a pole.
 Each type of DGS uses a normal and a night-time bitmap file.</p>
 <ul>
   <li>Place at most one DGS at each boarding bridge.</li>
@@ -118,8 +122,15 @@ the objects' names.</p>
 without breaking the system. If you do change the boarding bridge
 object and/or bitmap then I recommend giving your versions a
 different file name.</p>
+<p>If you use Blender then use the file <code>AutoGate.blend</code>
+in the <code>objs</code> folder as a starting point since importing
+<code>AutoGate.obj</code> will cause the animation to be lost.
+If you use another 3D modelling application then check that it can
+correctly import and re-export <code>AutoGate.obj</code> (including
+animations) before you spend a lot of time editing.</p>
 <ul>
-  <li>You can re-texture the boarding bridge.
+  <li>You can re-texture the boarding bridge (if you're using Blender
+don't forget to also re-texture the version in Layer 2).</li>
   <li>You can remove or change the centreline quad. However the
 plugin expects the stopping point to  be along the line x=0 and
 you can't change this behaviour.</li>
@@ -142,12 +153,6 @@ rest (animation frame 1 in Blender).</li>
 level-of-detail version for viewing at distances above 1000m (in Blender
 this is in Layer 2). You should retain this feature to reduce the
 load on X-Plane.</p>
-<p>If you use Blender then use the file <code>AutoGate.blend</code>
-in the <code>v8objs</code> folder as a starting point since importing
-<code>AutoGate.obj</code> will cause the animation to be lost.
-If you use another 3D modelling application then check that it can
-correctly import and re-export <code>AutoGate.obj</code> (including
-animations) before you spend a lot of time editing.</p>
 <h4>Docking Guidance System</h4>
 <p>The supplied DGSs are not designed to be customisable.
 However the plugin publishes the following datarefs that you can
@@ -204,10 +209,10 @@ same in your DGS to reduce the load on X-Plane.</p>
   <dt>&nbsp;</dt>
   <dt><code>marginal.org.uk/dgs/id4</code></dt>
   <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
-  <dd>1 - B777, 2 - B787, 3 - Avro/RJxx, 4 - MD11.</dd>
+  <dd>1 - B777, 2 - B787, 3 - Avro/RJxx, 4 - unknown.</dd>
 </dl>
 <h3>Upgrade information</h3>
-<p>In older versions of this kit the objects <code>AutoGate.obj</code>
+<p>In version 0.2 of this kit the objects <code>AutoGate.obj</code>
 and <code>Safedock2S-*.obj</code> all used the same bitmap file -
 <code>AutoGate.png</code>. In this version <code>AutoGate.png</code>
 has been changed and is now only used by <code>AutoGate.obj</code>.
@@ -236,7 +241,7 @@ obligation.</p>
 <table style="width: 100%;" border="0" cellpadding="2">
   <tbody>
     <tr>
-      <td class="banner">Beta 0.3 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
+      <td class="banner">Version 1.0 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
       <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.png"/></a>
       </td>
     </tr>
