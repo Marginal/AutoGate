@@ -1,0 +1,31 @@
+# -*-Makefile-*-
+
+XPSDK=../../XPSDK102
+
+CC=gcc
+#BUILD=-g -O -DDEBUG
+BUILD=-Os -s -DNDEBUG
+DEFINES=-DAPL=0 -DIBM=0 -DLIN=1
+INC=-I$(XPSDK)/CHeaders/XPLM
+CFLAGS=-shared -x c++ -ansi $(BUILD) $(DEFINES) $(INC)
+
+SRC=autogate.c
+TARGET=AutoGateLinux.xpl
+LIBS=
+
+RM=rm -f
+CP=cp
+
+all:	$(TARGET)
+
+install:	$(TARGET)
+	$(CP) $(TARGET) ~/Desktop/X-Plane/Resources/plugins
+	$(CP) $(TARGET) ../plugins
+
+$(TARGET):	$(SRC) $(LIBS) Makefile.lin
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(LIBS)
+
+AutoGate.c:	AutoGate.h
+
+clean:
+	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~

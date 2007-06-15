@@ -1,0 +1,31 @@
+# -*-Makefile-*-
+
+XPSDK=../../XPSDK102
+
+CC=gcc
+#BUILD=-g -O -DDEBUG
+BUILD=-Os -s -DNDEBUG
+DEFINES=-DAPL=1 -DIBM=0 -DLIN=0
+INC=-I$(XPSDK)/CHeaders/XPLM
+CFLAGS=-arch ppc -arch i586 -pipe -single_module -dynamiclib -flat_namespace -undefined warning $(BUILD) $(DEFINES) $(INC)
+
+SRC=autogate.c
+TARGET=AutoGateMac.xpl
+LIBS=
+
+RM=rm -f
+CP=cp
+
+all:	$(TARGET)
+
+install:	$(TARGET)
+	$(CP) $(TARGET) ~/Desktop/X-Plane/Resources/plugins
+	$(CP) $(TARGET) ../plugins
+
+$(TARGET):	$(SRC) $(LIBS) Makefile.mac
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(LIBS)
+
+AutoGate.c:	AutoGate.h
+
+clean:
+	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~

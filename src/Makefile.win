@@ -1,0 +1,31 @@
+# -*-Makefile-*-
+
+XPSDK=\src\XPSDK102
+
+CC=cl
+#BUILD=-ZI -DDEBUG
+BUILD=-Ox -DNDEBUG
+DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -D_CRT_SECURE_NO_DEPRECATE
+INC=-I$(XPSDK)\CHeaders\XPLM
+CFLAGS=-nologo -LD $(BUILD) $(DEFINES) $(INC)
+
+SRC=autogate.c
+TARGET=AutoGateWin.xpl
+LIBS=$(XPSDK)\Libraries\Win\XPLM.lib
+
+RM=del /q
+CP=copy /y
+
+default:	$(TARGET)
+
+install:	$(TARGET)
+	$(CP) $(TARGET) "C:\Games\X-Plane\Resources\plugins"
+	$(CP) $(TARGET) ..\plugins
+
+$(TARGET):	$(SRC) $(LIBS) Makefile.win
+	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
+
+AutoGate.c:	AutoGate.h
+
+clean:
+	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~
