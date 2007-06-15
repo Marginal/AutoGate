@@ -43,16 +43,17 @@ summary of the Safedock<small><sup>&reg;</sup></small>
 <h3>How it works</h3>
 <p>The boarding bridge and DGS scenery objects are animated using
 X-Plane custom datarefs. The values of these datarefs are supplied by a
-plugin. The plugin needs to know the location of the main door on the
+plugin.</p>
+<p>The plugin needs to know the location of the main door on the
 plane that the user is flying; the plugin currently only knows this for
-some planes, including the default United 747.</p>
+some planes, including the default United 747. If the plugin is not
+installed or if the user is piloting an unrecognised plane then the DGS
+will stay blank and the boarding bridge will stay in the undocked
+position.</p>
 <p>The system is designed so that it imposes no more load on
 X-Plane than normal "static" scenery objects unless the user's
 viewpoint is within 1000m of a boarding bridge or 500m of a DGS, in
 which case the load remains very modest.</p>
-<p>If the plugin is not installed or if the user is piloting an
-unrecognised plane then the DGS will stay blank and the boarding bridge
-will stay in the undocked position.</p>
 <h3>Usage</h3>
 <p>Copy the plugin from the <code>plugins</code>
 folder to your <code>X-Plane/Resources/plugins</code>
@@ -88,72 +89,142 @@ her plane if you don't include a DGS).</p>
   <li>The DGS will remain blank or will display incorrect
 information if it is not placed next to a boarding bridge.</li>
   <li>For correct operation, the DGS must be placed within the
-highlighted region behind the bridge's "elbow":</li>
+highlighted region behind the bridge object's origin:</li>
 </ul>
 <div style="margin-left: 80px;"><img style="width: 362px; height: 270px;" alt="placement of GDS" src="imgs/GDSplacement.png"></div>
 <h3>Customisation</h3>
 <p>You can rename the objects and have multiple versions with
-different file names (but the rules above still apply irrespective of
-the objects' names).</p>
+different file names. The above rules still apply irrespective of
+the objects' names.</p>
+<h4>Boarding bridge</h4>
 <p>You can change the following things about the boarding
 bridge(s) without breaking the system:</p>
 <ul>
   <li>You can re-texture the boarding bridge. As supplied, it
 shares a bitmap (<code>AutoGate.png</code>) with the
-Safedock DGS. The highlighted region is not used by the DGS. Or you can
-use a different bitmap file for the boarding bridge(s).</li>
+Safedock DGS. The highlighted region is not used by the DGS and is
+available for texturing boarding bridge. Or you can
+use a different bitmap file for boarding bridges.</li>
 </ul>
 <div style="margin-left: 80px;"><img style="width: 384px; height: 192px;" alt="Texture layout" src="imgs/texlayout.png"><br>
 <small>(this image has been rotated and reduced in size from the
 original)</small></div>
 <ul>
   <li>You can remove or change the centreline quad. However the
-plugin
-expects the centreline to be along the line x=0 and you can't change
-this behaviour.</li>
+plugin expects the stopping point to  be along the line x=0 and
+you can't change this behaviour.</li>
   <li>You can make any changes you like to the "upper arm" and
-"elbow". You can't change the <u>location</u> of the
 "elbow".</li>
   <li>You can change the appearance of parts of the boarding
 bridge below the "elbow" but with the following constraints:</li>
   <ul>
-    <li>Don't change the animations (Armature location and poses
-in Blender) at all.</li>
+    <li>Don't move or change the animations (Armature location and
+pose in Blender) at all.</li>
     <li>The plugin expects that the floor of the doorway is 4m
 above the ground when the object is at rest (animation frame 1 in
 Blender).</li>
     <li>The plugin expects that that the edge of the doorway is
-20m south and 7.5m west of an unrotated object's origin when
-the object is at rest (animation frame 1 in Blender).</li>
+7.5m west of an unrotated object's origin when the object is at
+rest (animation frame 1 in Blender).</li>
   </ul>
-  <li>As supplied, the boarding bridge includes a static reduced
-level-of-detail version for distances above 1000m (in Blender this is
-in Layer 2). You should retain this feature to reduce the
-load on X-Plane.</li>
 </ul>
+<p>As supplied, the boarding bridge includes a static reduced
+level-of-detail version for viewing at distances above 1000m (in Blender
+this is in Layer 2). You should retain this feature to reduce the
+load on X-Plane.</p>
 <p>If you use Blender then use the supplied <code>AutoGate.blend</code> file as a starting point since importing <code>AutoGate.obj</code>
 will cause the animation to be lost. If you use another 3D modelling
 application then check that it can correctly import and re-export <code>AutoGate.obj</code> (including animations) before you spend a lot of time editing.</p>
-<p>The Safesock2S is not designed to be customisable. Contact the
-<a href="mailto:x-plane@marginal.org.uk">author</a>
-if you want to use a different kind of DGS.</p>
+<h4>Docking Guidance System</h4>
+<p>The supplied Safesock2S DGS is not designed to be customisable.
+However the plugin publishes the following datarefs that you can
+use to construct your own DGS. Contact the
+<a href="mailto:x-plane@marginal.org.uk">author</a> if you would
+like additional datarefs.</p>
+<p>The supplied Safegate 2S DGS includes a static reduced
+level-of-detail version for viewing at distances above 500m. You
+should do the same in your DGS to reduce the load on X-Plane.</p>
+<dl>
+  <dt><code>marginal.org.uk/dgs/status</code></dt>
+  <dd>0 - "Idle". All other published datarefs will also have value 0.</dd>
+  <dd>1 - "Active". A plane is approaching the gate and the plane's doorway location is known.</dd>
+  <dd>2 & 3 - "Stop". The plane is at the stopping point. The
+      value alternates between 2 and 3 once a second.</dd>
+  <dd>4 - "Too far". The plane is beyond the stopping point.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/track</code></dt>
+  <dd>0 - "Idle/Stop/Too far". Either no plane is approaching the gate or the plane is at or beyond the stopping point (<code>status</code>=0, 2, 3 or 4).</dd>
+  <dd>1 - "Active". A plane is approaching the gate and the plane's doorway location is known (<code>status</code>=1).</dd>
+  <dd>2 - "Tracking". The plane is &gt;6m and &lt;&asymp;60m from the stopping point (<code>status</code>=1).</dd>
+  <dd>3 - "Tracking 6m". The plane is <6m from the stopping point (<code>status</code>=1).</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/lr</code></dt>
+  <dd>0 - "Idle/Active" (<code>status</code>=0 or <code>track</code>=1).</dd>
+  <dd>1 - "Tracking left". The plane is to the left of the stopping point (<code>track</code>=2 or 3).</dd>
+  <dd>2 - "Tracking right". The plane is to the right of the stopping point (<code>track</code>=2 or 3).</dd>
+  <dd>3 - "Stop/Too far". The plane is at or beyond the stopping point (<code>track</code>=0).</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/azimuth</code></dt>
+  <dd>0 if <code>track</code>=0 or 1.</dd>
+  <dd>Distance (in increments of 0.5m) that the plane is to the right of the stopping point if <code>track</code>=2 or 3. Negative when the plane is to the left of the stopping point. Has value -4 or +4 if the plane is >4m to the left or right of the stopping point.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/distance</code></dt>
+  <dd>0 if <code>track</code>=0 or 1.</dd>
+  <dd>Distance (in increments of 0.5m) of the plane from the stopping point if <code>track</code>=2 or 3. Has value 12 if the plane is >12m from the stopping point.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/distance2</code></dt>
+  <dd>0 if <code>track</code>=0 or 1.</dd>
+  <dd>Distance-6m (in increments of 0.5m) of the plane from the stopping point if <code>track</code>=2. Has value 6 if the plane is >12m from the stopping point.</dd>
+  <dd>Distance (in increments of 0.5m) of the plane from the stopping point if <code>track</code>=3.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/id1</code></dt>
+  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
+  <dd>1 - A300, 2 - A310, 3 - A320, 4 - A330.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/id2</code></dt>
+  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
+  <dd>1 - A340, 2 - A350, 3 - A380, 4 - B717.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/id3</code></dt>
+  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
+  <dd>1 - B737, 2 - B747, 3 - B757, 4 - B767.</dd>
+  <dt>&nbsp;</dt>
+  <dt><code>marginal.org.uk/dgs/id4</code></dt>
+  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
+  <dd>1 - B777, 2 - B787, 3 - Avro/RJxx, 4 - MD11.</dd>
+</dl>
 <h3>Acknowledgements</h3>
 <p>&ldquo;X-Plane&rdquo; is a registered trademark of
 <a href="http://www.x-plane.com/">Laminar Research</a>.</p>
 <p>&ldquo;Safedock&rdquo; is a registered trademark of <a href="http://www.safegate.com/">Safegate group</a>.
 Safegate group is not associated with and does not endorse this scenery
 kit.</p>
+<h3>License</h3>
+<p>This kit is licensed under the Creative Commons <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/">Attribution</a> license.</p>
+<p>In short, you can use any part of this kit (including objects,
+images and plugins) in commerical scenery packages, but you must
+give the author credit.<p>
+<p>The author would appreciate a courtesy copy of any commercial
+scenery that you make using this kit, but you are under no
+obligation.</p>
 <hr>
 <table style="width: 100%;" border="0" cellpadding="2">
   <tbody>
     <tr>
-      <td class="banner">Alpha 0.1 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
-      <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.5/"><img style="border: 0px solid ; width: 88px; height: 31px;" alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.png"></a><br>
+      <td class="banner">Beta 0.2 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
+      <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.png"/></a>
       </td>
     </tr>
   </tbody>
 </table>
 <!--/Creative Commons License-->
-<!-- <rdf:RDF xmlns="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> <Work rdf:about=""> <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" /> <dc:type rdf:resource="http://purl.org/dc/dcmitype/InteractiveResource" /> </Work> <License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/"><permits rdf:resource="http://web.resource.org/cc/Reproduction"/><permits rdf:resource="http://web.resource.org/cc/Distribution"/><requires rdf:resource="http://web.resource.org/cc/Notice"/><requires rdf:resource="http://web.resource.org/cc/Attribution"/><permits rdf:resource="http://web.resource.org/cc/DerivativeWorks"/><requires rdf:resource="http://web.resource.org/cc/ShareAlike"/></License></rdf:RDF> -->
+<!-- <rdf:RDF xmlns="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <Work rdf:about="">
+    <license rdf:resource="http://creativecommons.org/licenses/by/2.5/" />
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/InteractiveResource" />
+  </Work>
+    <License rdf:about="http://creativecommons.org/licenses/by/2.5/"><permits rdf:resource="http://web.resource.org/cc/Reproduction"/><permits rdf:resource="http://web.resource.org/cc/Distribution"/><requires rdf:resource="http://web.resource.org/cc/Notice"/><requires rdf:resource="http://web.resource.org/cc/Attribution"/><permits rdf:resource="http://web.resource.org/cc/DerivativeWorks"/></License>
+</rdf:RDF>
+-->
 </body>
 </html>
