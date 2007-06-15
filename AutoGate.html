@@ -27,12 +27,13 @@ Scenery</a> &raquo; <a href="http://marginal.org.uk/x-planescenery/tools.html">T
   </tbody>
 </table>
 <hr>
+
 <h2>AutoGate boarding bridge and docking guidance system kit
 for X-Plane<small><sup>&reg;</sup></small></h2>
 <h3>Overview</h3>
 <p>This kit allows X-Plane scenery designers to add animated
 boarding bridges and docking guidance systems (DGS) to scenery
-packages. One boarding bridge and two DGSs are included.</p>
+packages. One boarding bridge and two types of DGS are included.</p>
 <p>The boarding bridge animates to "dock" with the plane's main
 door when the pilot shuts down the plane's engines with the plane
 within &frac12;m of the correct stopping position. The
@@ -58,6 +59,7 @@ boarding bridge will stay in the undocked position.</p>
 X-Plane than normal "static" scenery objects unless the user's
 viewpoint is within 1000m of a boarding bridge or 500m of a DGS, in
 which case the load remains very modest.</p>
+
 <h3>Usage</h3>
 <p>Copy one of <code>AutoGateLinux.xpl</code>, <code>AutoGateMac.xpl</code> or
 <code>AutoGateWin.xpl</code> from the <code>plugins</code> folder to your
@@ -72,8 +74,8 @@ contain any documentation on the operation of the boarding bridge or
 DGS. You may wish to supply such documentation with your
 scenery package; you can use
 <a href="Safedock%20Pilot%20Instructions.html" target="_blank">this</a>
-as a starting point.
-</p>
+as a starting point.</p>
+<h4>Boarding bridge</h4>
 <p>The boarding bridge object and bitmap file are
 <code>AutoGate.obj</code> and <code>AutoGate.png</code> in the
 <code>objs</code> folder. Place as many copies of
@@ -86,33 +88,56 @@ other. For reference, the distance between the "elbow" and "wrist" is
 20m and the distance between the extended centreline and the "elbow" is
 10m.</li>
 </ul>
-<p>Use of a DGS is optional - the boarding bridge works fine
-without it - but it will be hard for the pilot to position the
-plane correctly if you don't include a DGS.
-Two types of DGS are supplied:</p>
-<ol>
-  <li>A Safegate<small><sup>&reg;</sup></small> inductive-loop DGS.
-These were installed at airports up to year 2000.</li>
-  <li>A Safedock<small><sup>&reg;</sup></small> 2S advanced DGS.
-These were first installed at airports around year 2000.</li>
-</ol>
+<p>Use of a DGS is optional - the AutoGate bridge works fine without it -
+but it will be hard for the pilot to position the plane correctly if you
+don't include a DGS. Two types of DGS are supplied:</p>
+<dl>
+  <dt>A Safegate<small><sup>&reg;</sup></small> inductive-loop DGS
+<small>(these were installed at airports up to year 2000)</small>.</dt>
+  <dd>The Safegate objects are named <code>Safegate-<i>h</i>m.obj</code> and <code>Safegate-<i>h</i>m-pole.obj</code>. These objects use the bitmap files <code>Safegate.png</code> and <code>Safegate_LIT.png</code>.
+  <dt>A Safedock<small><sup>&reg;</sup></small> 2S advanced DGS
+<small>(these were first installed at airports around year 2000)</small>.</dt>
+  <dd>The Safedock 2S objects are named <code>Safedock2S-<i>h</i>m.obj</code> and <code>Safedock2S-<i>h</i>m-pole.obj</code>. These objects use the bitmap files <code>Safedock2S.png</code> and <code>Safedock2S_LIT.png</code>.
+</dl>
 <p>Various versions of these DGS objects are supplied in the
-<code>objs</code> folder, eg <code>Safedock2S-6m.obj</code>.
-These differ in the height of the DGS above the ground and whether
-the DGS is mounted on a pole.
-Each type of DGS uses a normal and a night-time bitmap file.</p>
+<code>objs</code> folder. These differ in the height of the DGS above the
+ground and whether the DGS is mounted on a pole. You don't need to distribute
+all of these objects with your scenery package - only the ones that you use.</p>
 <ul>
-  <li>Place at most one DGS at each boarding bridge.</li>
+  <li>Place at most one DGS at each AutoGate boarding bridge.</li>
   <li>The DGS will remain blank or will display incorrect
-information if it is not placed next to a boarding bridge.</li>
+information if it is not placed next to an AutoGate boarding bridge.</li>
   <li>For correct operation, the DGS must be placed within the
-highlighted region behind the bridge object's origin:</li>
+highlighted region behind the AutoGate object's origin:</li>
 </ul>
 <div style="margin-left: 80px;"><img style="width: 362px; height: 270px;" alt="placement of GDS" src="imgs/GDSplacement.png"></div>
 <ul>
   <li>The Safegate DGS works by line-of-sight, and so must
 be placed on the extended centreline.</li>
 </ul>
+<h4>Stand-alone DGSs</h4>
+<p>A second set of DGSs are supplied for use without an accompanying
+AutoGate boarding bridge:<p>
+<dl>
+  <dt>A Safegate<small><sup>&reg;</sup></small> inductive-loop DGS.</dt>
+  <dd>The stand-alone Safegate objects are named <code>SA-<i>d</i>m-Safegate-<i>h</i>m.obj</code>. These objects use the bitmap files <code>Safegate.png</code> and <code>Safegate_LIT.png</code>.
+  <dt>A Safedock<small><sup>&reg;</sup></small> 2S advanced DGS.</dt>
+  <dd>The stand-alone Safedock 2S objects are named <code>SA-<i>d</i>m-Safedock2S-<i>h</i>m.obj</code>. These objects use the bitmap files <code>Safedock2S.png</code> and <code>Safedock2S_LIT.png</code>.
+</dl>
+<p>Various versions of these stand-alone DGS objects are supplied in the
+<code>objs</code> folder. These differ in the distance between the stopping
+point and the DGS, and in the  height of the DGS above the ground. All of
+the stand-alone DGSs are mounted on a pole. You don't need to distribute
+all of these objects with your scenery package - only the ones that you use.</p>
+<ul>
+  <li>The DGSs should be placed with the heading that you want the plane
+to have when it stops at the gate.</li>
+  <li>If your scenery includes static boarding bridges, place the DGS so that
+the origin of the DGS object is alongside the boarding bridge door.</li>
+  <li>Place the stand-alone DGSs with their origins more than 20m away from
+each other and from any AutoGate boarding bridges.</li>
+</ul>      
+
 <h3>Customisation</h3>
 <p>You can rename the objects and have multiple versions with
 different file names. The above rules still apply irrespective of
@@ -211,17 +236,6 @@ same in your DGS to reduce the load on X-Plane.</p>
   <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
   <dd>1 - B777, 2 - B787, 3 - Avro/RJxx, 4 - unknown.</dd>
 </dl>
-<h3>Upgrade information</h3>
-<p>In version 0.2 of this kit the objects <code>AutoGate.obj</code>
-and <code>Safedock2S-*.obj</code> all used the same bitmap file -
-<code>AutoGate.png</code>. In this version <code>AutoGate.png</code>
-has been changed and is now only used by <code>AutoGate.obj</code>.
-The <code>Safedock2S-*.obj</code> objects now use the bitmap files
-<code>Safedock2S.png</code> and <code>Safedock2S_LIT.png</code>.</p>
-<p>Therefore if you use the new versions of any of these objects
-please be sure to also use the new versions of
-<code>AutoGate.png</code>, <code>Safedock2S.png</code> &amp;
-<code>Safedock2S_LIT.png</code>.</p>
 <h3>Acknowledgements</h3>
 <p>&ldquo;X-Plane&rdquo; is a registered trademark of
 <a href="http://www.x-plane.com/">Laminar Research</a>.</p>
@@ -241,7 +255,7 @@ obligation.</p>
 <table style="width: 100%;" border="0" cellpadding="2">
   <tbody>
     <tr>
-      <td class="banner">Version 1.0 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
+      <td class="banner">Version 1.10 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
       <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.png"/></a>
       </td>
     </tr>
