@@ -33,7 +33,7 @@ for X-Plane<small><sup>&reg;</sup></small></h2>
 <h3>Overview</h3>
 <p>This kit allows X-Plane scenery designers to add animated
 boarding bridges and docking guidance systems (DGS) to scenery
-packages. One boarding bridge and two types of DGS are included.</p>
+packages. Two boarding bridges and two types of DGS are included.</p>
 <p>The boarding bridge animates to "dock" with the plane's main
 door when the pilot shuts down the plane's engines with the plane
 within &frac12;m of the correct stopping position. The
@@ -76,19 +76,20 @@ scenery package; you can use
 <a href="Safedock%20Pilot%20Instructions.html" target="_blank">this</a>
 as a starting point.</p>
 <h4>Boarding bridge</h4>
-<p>The boarding bridge object and bitmap file are
-<code>AutoGate.obj</code> and <code>AutoGate.png</code> in the
-<code>objs</code> folder. Place as many copies of
-<code>AutoGate.obj</code> as you like in your scenery:</p>
+<p>Two AutoGate boarding bridge objects are supplied in the
+<code>objs</code> folder - <code>AutoGate.obj</code>
+(shown below) and <code>AutoGate-angled.obj</code>. Both objects use the
+bitmap file <code>AutoGate.png</code>. Place as many copies of
+these objects as you like in your scenery:</p>
 <ul>
-  <li>The bridge should be placed with the heading that
+  <li>The bridges should be placed with the heading that
 you want the plane to have when it stops at the gate.</li>
   <li>Place bridges with their origins more than 20m away from each
 other. For reference, the distance between the "elbow" and "wrist" is
-20m and the distance between the extended centreline and the "elbow" is
+20m and the distance between the extended centreline and the "wrist" is
 10m.</li>
 </ul>
-<p>Use of a DGS is optional - the AutoGate bridge works fine without it -
+<p>Use of a DGS is optional - the AutoGate bridges work fine without it -
 but it will be hard for the pilot to position the plane correctly if you
 don't include a DGS. Two types of DGS are supplied:</p>
 <dl>
@@ -143,38 +144,33 @@ each other and from any AutoGate boarding bridges.</li>
 different file names. The above rules still apply irrespective of
 the objects' names.</p>
 <h4>Boarding bridge</h4>
-<p>You can change the following things about the boarding bridge
+<p>You can change the following things about the boarding bridges
 without breaking the system. If you do change the boarding bridge
-object and/or bitmap then I recommend giving your versions a
+objects and/or bitmap then I recommend giving your versions a
 different file name.</p>
-<p>If you use Blender then use the file <code>AutoGate.blend</code>
-in the <code>objs</code> folder as a starting point since importing
-<code>AutoGate.obj</code> will cause the animation to be lost.
+<p>If you use Blender then use the file <code>AutoGate.blend</code> or
+<code>AutoGate-angled.blend</code> in the <code>objs</code> folder as a
+starting point since importing the objects will cause the animation to be lost.
 If you use another 3D modelling application then check that it can
 correctly import and re-export <code>AutoGate.obj</code> (including
 animations) before you spend a lot of time editing.</p>
 <ul>
   <li>You can re-texture the boarding bridge (if you're using Blender
-don't forget to also re-texture the version in Layer 2).</li>
+don't forget to also re-texture the static version in Layer 2).</li>
   <li>You can remove or change the centreline quad. However the
 plugin expects the stopping point to  be along the line x=0 and
 you can't change this behaviour.</li>
-  <li>You can make any changes you like to the "upper arm" and
-"elbow".</li>
-  <li>You can change the appearance of parts of the boarding
-bridge below the "elbow" but with the following constraints:</li>
+  <li>You can make any changes you like to the "upper arm".</li>
+  <li>You can change the parts of the boarding bridge below the "elbow"
+but with the following constraints:</li>
   <ul>
-    <li>Don't move or change the animations (Armature location and
-pose in Blender) at all.</li>
-    <li>The plugin expects that the floor of the doorway is 4m
-above the ground when the object is at rest (animation frame 1 in
-Blender).</li>
-    <li>The plugin expects that that the edge of the doorway is
-7.5m west of an unrotated object's origin when the object is at
-rest (animation frame 1 in Blender).</li>
+    <li>When the "vert" dataref is 0 the floor of the doorway is 4m above the ground.</li>
+    <li>The doorway moves 1m up when the "vert" dataref increases by 1.</li>
+    <li>When the "lat" dataref is 0 the doorway is 7.5m due west of the unrotated object's origin.</li>
+    <li>The doorway moves 1m towards the plane when the "lat" dataref increases by 1.</li>
   </ul>
 </ul>
-<p>As supplied, the boarding bridge includes a static reduced
+<p>As supplied, the boarding bridges include a static reduced
 level-of-detail version for viewing at distances above 1000m (in Blender
 this is in Layer 2). You should retain this feature to reduce the
 load on X-Plane.</p>
@@ -255,7 +251,7 @@ obligation.</p>
 <table style="width: 100%;" border="0" cellpadding="2">
   <tbody>
     <tr>
-      <td class="banner">Version 1.10 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
+      <td class="banner">Version 1.20 &copy; 2006 <a href="mailto:x-plane@marginal.org.uk">Jonathan Harris</a>
       <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.png"/></a>
       </td>
     </tr>
