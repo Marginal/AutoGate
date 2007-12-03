@@ -7,7 +7,7 @@ for obj in ['Safedock2S-%sm.obj',
             'Safedock2S-%sm-pole.obj',
             'Safegate-%sm.obj',
             'Safegate-%sm-pole.obj']:
-    for height in [4, 4.5, 5, 5.5, 6.5, 7]:
+    for height in [3, 3.5, 4, 4.5, 5, 5.5, 6.5, 7]:
         infilename=("objs/"+obj) % refheight
         infile=file(infilename, 'rt')
         outfilename=("objs/"+obj)% height
