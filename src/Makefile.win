@@ -20,6 +20,7 @@ default:	$(TARGET)
 
 install:	$(TARGET)
 	$(CP) $(TARGET) "C:\Games\X-Plane\Resources\plugins"
+	$(CP) $(TARGET) "C:\Games\X-Plane 9.00\Resources\plugins"
 	$(CP) $(TARGET) ..\plugins
 
 $(TARGET):	$(SRC) $(LIBS) Makefile.win
@@ -28,4 +29,4 @@ $(TARGET):	$(SRC) $(LIBS) Makefile.win
 AutoGate.c:	AutoGate.h
 
 clean:
-	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~
+	$(RM) *~ *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl $(TARGET)

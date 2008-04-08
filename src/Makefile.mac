@@ -4,7 +4,7 @@ XPSDK=../../XPSDK102
 
 CC=gcc
 #BUILD=-g -O -DDEBUG
-BUILD=-Os -s -DNDEBUG
+BUILD=-Os -Wl,-x -DNDEBUG
 DEFINES=-DAPL=1 -DIBM=0 -DLIN=0
 INC=-I$(XPSDK)/CHeaders/XPLM
 CFLAGS=-arch ppc -arch i586 -pipe -single_module -dynamiclib -flat_namespace -undefined warning $(BUILD) $(DEFINES) $(INC)
@@ -20,6 +20,7 @@ all:	$(TARGET)
 
 install:	$(TARGET)
 	$(CP) $(TARGET) ~/Desktop/X-Plane/Resources/plugins
+	$(CP) $(TARGET) ~/Desktop/X-Plane\ 9.00/Resources/plugins
 	$(CP) $(TARGET) ../plugins
 
 $(TARGET):	$(SRC) $(LIBS) Makefile.mac
@@ -28,4 +29,4 @@ $(TARGET):	$(SRC) $(LIBS) Makefile.mac
 AutoGate.c:	AutoGate.h
 
 clean:
-	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~
+	$(RM) *~ *.bak *.o $(TARGET)

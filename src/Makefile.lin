@@ -28,4 +28,4 @@ $(TARGET):	$(SRC) $(LIBS) Makefile.lin
 AutoGate.c:	AutoGate.h
 
 clean:
-	$(RM) *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl *~
+	$(RM) *~ *.bak *.o $(TARGET)

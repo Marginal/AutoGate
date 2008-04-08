@@ -1,7 +1,7 @@
 /*
  * AutoGate
  * 
- * (c) Jonathan Harris 2006
+ * (c) Jonathan Harris 2006,2008
  * 
  */
 
@@ -46,18 +46,18 @@ const float DURATION=5;	/* Time to engage/disengage */
 
 
 /* prototypes */
-void newplane(void);
-void resetidle(void);
+static void newplane(void);
+static void resetidle(void);
 
-XPLMDataRef floatref(char*, XPLMGetDataf_f, float*);
-float getgate(XPLMDataRef);
-float getdgs(XPLMDataRef);
+static XPLMDataRef floatref(char*, XPLMGetDataf_f, float*);
+static float getgate(XPLMDataRef);
+static float getdgs(XPLMDataRef);
 
-int updategate(void);
-int updatedgs(void);
-void updaterefs(void);
+static int updategate(void);
+static int updatedgs(void);
+static void updaterefs(void);
 
-void drawdebug(XPLMWindowID, void *);
+static void drawdebug(XPLMWindowID, void *);
 
 
 /* types */
@@ -117,71 +117,29 @@ typedef struct {
 
 /* Known planes */
 const icao_t icaodb[]={
-	{"A300", 0},
-	{"A306", 0},
-	{"A30B", 0},
+	{"A30",  0},
 	{"A3ST", 0},
-	{"A310", 1},
 	{"A318", 2},
 	{"A319", 2},
-	{"A320", 2},
-	{"A321", 2},
-	{"A330", 3},
-	{"A332", 3},
-	{"A333", 3},
-	{"A340", 4},
-	{"A342", 4},
-	{"A343", 4},
-	{"A345", 4},
-	{"A346", 4},
-	{"A350", 5},
-	{"A358", 5},
-	{"A359", 5},
-	{"A380", 6},
-	{"A388", 6},
-	{"B717", 7},
-	{"B712", 7},
-	{"MD87", 7},
-	{"MD95", 7},
-	{"B737", 8},
-	{"B731", 8},
-	{"B732", 8},
-	{"B733", 8},
-	{"B734", 8},
-	{"B735", 8},
-	{"B736", 8},
-	{"B738", 8},
-	{"B739", 8},
+	{"A32",  2},
+	{"A310", 1},	/* Note after A318/A319 */
+	{"A33",  3},
+	{"A34",  4},
+	{"A35",  5},
+	{"A38",  6},
+	{"B71",  7},
+	{"MD8",  7},
+	{"MD9",  7},
+	{"B73",  8},
 	{"E737", 8},
-	{"B747", 9},
-	{"B741", 9},
-	{"B742", 9},
-	{"B743", 9},
-	{"B744", 9},
-	{"B74D", 9},
-	{"B74S", 9},
-	{"B74R", 9},
+	{"B74",  9},
 	{"BSCA", 9},
-	{"B757", 10},
-	{"B752", 10},
-	{"B753", 10},
-	{"B767", 11},
-	{"B762", 11},
-	{"B763", 11},
-	{"B764", 11},
+	{"B75",  10},
+	{"B76",  11},
 	{"E767", 11},
-	{"B777", 12},
-	{"B772", 12},
-	{"B773", 12},
-	{"B787", 13},
-	{"B783", 13},
-	{"B788", 13},
-	{"B789", 13},
-	{"RJ70", 14},
-	{"RJ85", 14},
-	{"RJ1H", 14},
-	{"B461", 14},
-	{"B462", 14},
-	{"B463", 14},
+	{"B77",  12},
+	{"B78",  13},
+	{"RJ",   14},
+	{"B46",  14},
 };
 

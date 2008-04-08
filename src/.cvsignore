@@ -1,0 +1,11 @@
+!
+CVS
+*.bak
+
+*.obj
+*.lib
+*.idb
+*.pdb
+*.ncb
+*.xpl
+*.exp
