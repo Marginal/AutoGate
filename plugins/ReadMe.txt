@@ -15,6 +15,14 @@ Installation
   to your X-Plane/Resources/plugins folder.
 
 
-Version 1.0
-Copyright Jonathan Harris 2006
+Compatible Planes
+-----------------
+* This plugin works with any plane that has a "boarding door location" entered
+  on the Standard->Viewpoint screen in Plane-Maker.
+* Docking guidance systems will display Airbus and Boeing model numbers if the
+  correct "ICAO code" has been entered on the Standard->Viewpoint screen.
+
+
+Version 1.10
+Copyright Jonathan Harris 2006,2008
 http://marginal.org.uk/x-planescenery/
