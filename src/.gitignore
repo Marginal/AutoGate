@@ -1,7 +1,4 @@
-!
-CVS
 *.bak
-
 *.obj
 *.lib
 *.idb
