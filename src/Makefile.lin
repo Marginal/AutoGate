@@ -1,31 +1,48 @@
 # -*-Makefile-*-
 
-XPSDK=../../XPSDK102
+include ../version.mak
+
+ifeq ($(shell arch), i686)
+ARCHDIR=
+else ifeq ($(shell arch), x86_64)
+ARCHDIR=64
+else
+$(error unknown architecture $(shell arch))
+endif
+
+XPSDK=../../XPSDK211
 
 CC=gcc
-#BUILD=-g -O -DDEBUG
-BUILD=-Os -s -DNDEBUG
-DEFINES=-DAPL=0 -DIBM=0 -DLIN=1
-INC=-I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-shared -x c++ -ansi $(BUILD) $(DEFINES) $(INC)
+#BUILD=-g -DDEBUG
+#LDFLAGS=
+BUILD=-O3 -s -DNDEBUG
+LDFLAGS=-Wl,-x
+DEFINES=-DAPL=0 -DIBM=0 -DLIN=1 -DVERSION=$(VERSION)
+INC=-I$(XPSDK)/CHeaders/XPLM -I$(XPSDK)/CHeaders/Widgets
+CFLAGS=-shared -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
 
-SRC=autogate.c
-TARGET=AutoGateLinux.xpl
-LIBS=
+OBJS=autogate.o
+TARGET=../$(PROJECT)/$(ARCHDIR)/lin.xpl
+LIBS=-lGLU -lGL
 
 RM=rm -f
-CP=cp
+CP=cp -p
+MD=mkdir -p
 
 all:	$(TARGET)
 
 install:	$(TARGET)
-	$(CP) $(TARGET) ~/Desktop/X-Plane/Resources/plugins
-	$(CP) $(TARGET) ../plugins
+ifeq ($(shell arch), i686)
+	$(MD) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/$(ARCHDIR)
+	$(CP) $(TARGET) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/$(ARCHDIR)/
+endif
+	$(MD) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/$(ARCHDIR)
+	$(CP) $(TARGET) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/$(ARCHDIR)/
 
-$(TARGET):	$(SRC) $(LIBS) Makefile.lin
-	$(CC) $(CFLAGS) -o $@ $(SRC) $(LIBS)
+$(TARGET):	$(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@ $+
 
-AutoGate.c:	AutoGate.h
+autogate.c:	autogate.h
 
 clean:
 	$(RM) *~ *.bak *.o $(TARGET)

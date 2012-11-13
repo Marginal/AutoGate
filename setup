@@ -1,5 +1,0 @@
-rm -f AutoGate.zip
-rm -f AutoGate_dev.zip
-
-zip -9 -j AutoGate.zip plugins/*.txt plugins/*.xpl 
-zip -9 AutoGate_dev.zip AutoGate.html "Safedock Pilot Instructions.html" imgs/*.png objs/AutoGate*.blend objs/*.obj objs/*.png

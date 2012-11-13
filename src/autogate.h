@@ -5,6 +5,11 @@
  * 
  */
 
+#ifdef _MSC_VER
+#  define _USE_MATH_DEFINES
+#  define _CRT_SECURE_NO_DEPRECATE
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -15,7 +20,7 @@
 #include "XPLMPlugin.h"
 
 
-const char pluginName[]="AutoGate v1.10";
+const char pluginName[]="AutoGate";
 const char pluginSig[] ="Marginal.AutoGate";
 const char pluginDesc[]="Manages boarding bridges and DGSs";
 

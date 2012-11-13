@@ -4,15 +4,15 @@ AutoGate plugin
 
 Requirements
 ------------
-* X-Plane 8.30 or later
-* Windows 98 or later, Mac OS 10.3.9 or later, Linux
+* X-Plane 9.00 or later
+* Windows XP or later, Mac OS 10.4 or later, Linux
 
 
 Installation
 ------------
 * Quit X-Plane if you have it running.
-* Copy one of AutoGateLinux.xpl, AutoGateMac.xpl or AutoGateWin.xpl
-  to your X-Plane/Resources/plugins folder.
+* Remove any existing AutoGate plugin from your X-Plane/Resources/plugins folder.
+* Copy the AutoGate folder into your X-Plane/Resources/plugins folder.
 
 
 Compatible Planes
@@ -23,6 +23,6 @@ Compatible Planes
   correct "ICAO code" has been entered on the Standard->Viewpoint screen.
 
 
-Version 1.10
-Copyright Jonathan Harris 2006,2008
+Version 1.30
+Copyright Jonathan Harris 2006-2012
 http://marginal.org.uk/x-planescenery/

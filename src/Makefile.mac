@@ -1,32 +1,38 @@
 # -*-Makefile-*-
 
-XPSDK=../../XPSDK102
+include ../version.mak
+
+XPSDK=../../XPSDK211
 
 CC=gcc
-#BUILD=-g -O -DDEBUG
-BUILD=-Os -Wl,-x -DNDEBUG
-DEFINES=-DAPL=1 -DIBM=0 -DLIN=0
+#BUILD=-g -DDEBUG
+#LDFLAGS=
+BUILD=-O3 -DNDEBUG
+LDFLAGS=-Wl,-x
+DEFINES=-DAPL=1 -DIBM=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-arch ppc -arch i586 -pipe -single_module -dynamiclib -flat_namespace -undefined warning $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -single_module -dynamiclib -flat_namespace -undefined warning -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
 
-SRC=autogate.c
-TARGET=AutoGateMac.xpl
+OBJS=autogate.o
+TARGET=../$(PROJECT)/mac.xpl
 LIBS=
 
 RM=rm -f
-CP=cp
+CP=cp -p
+MD=mkdir -p
 
 all:	$(TARGET)
 
 install:	$(TARGET)
-	$(CP) $(TARGET) ~/Desktop/X-Plane/Resources/plugins
-	$(CP) $(TARGET) ~/Desktop/X-Plane\ 9.00/Resources/plugins
-	$(CP) $(TARGET) ../plugins
+	$(MD) ~/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)
+	$(CP) $(TARGET) ~/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/
+	$(MD) ~/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)
+	$(CP) $(TARGET) ~/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/
 
-$(TARGET):	$(SRC) $(LIBS) Makefile.mac
-	$(CC) $(CFLAGS) -o $@ $(SRC) $(LIBS)
+$(TARGET):	$(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@ $+
 
-AutoGate.c:	AutoGate.h
+autogate.c:	autogate.h
 
 clean:
 	$(RM) *~ *.bak *.o $(TARGET)

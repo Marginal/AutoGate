@@ -1,0 +1,7 @@
+# Placeholder to create directory for output
+*.xpl
+*.exp
+*.idb
+*.ilk
+*.lib
+*.pdb

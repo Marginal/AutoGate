@@ -1,32 +1,48 @@
-# -*-Makefile-*-
+# -*-Makefile-*- in NMAKE format
 
-XPSDK=\src\XPSDK102
+!include ..\version.mak
+
+!if "$(CPU)" == "x86"
+ARCHDIR=
+ARCHXP=
+!elseif "$(CPU)" == "amd64"
+ARCHDIR=64
+ARCHXP=_64
+!else
+! error CPU should be defined as x86 or amd64
+!endif
+
+XPSDK=..\..\XPSDK211
 
 CC=cl
 #BUILD=-ZI -DDEBUG
 BUILD=-Ox -DNDEBUG
-DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -D_CRT_SECURE_NO_DEPRECATE
-INC=-I$(XPSDK)\CHeaders\XPLM
+DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
+INC=-I$(XPSDK)\CHeaders\XPLM -I$(XPSDK)/CHeaders/Widgets
 CFLAGS=-nologo -LD $(BUILD) $(DEFINES) $(INC)
 
 SRC=autogate.c
-TARGET=AutoGateWin.xpl
-LIBS=$(XPSDK)\Libraries\Win\XPLM.lib
+TARGET=..\$(PROJECT)\$(ARCHDIR)\win.xpl
+LIBS=$(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib
 
 RM=del /q
 CP=copy /y
+MD=mkdir
 
-default:	$(TARGET)
+all:	$(TARGET)
 
 install:	$(TARGET)
-	$(CP) $(TARGET) "C:\Games\X-Plane\Resources\plugins"
-	$(CP) $(TARGET) "C:\Games\X-Plane 9.00\Resources\plugins"
-	$(CP) $(TARGET) ..\plugins
+!if "$(CPU)" == "x86"
+	$(MD) "X:\Desktop\X-Plane 9\Resources\plugins\$(PROJECT)\$(ARCHDIR)" || echo.
+	$(CP) $(TARGET) "X:\Desktop\X-Plane 9\Resources\plugins\$(PROJECT)\$(ARCHDIR)\"
+!endif
+	$(MD) "X:\Desktop\X-Plane 10\Resources\plugins\$(PROJECT)\$(ARCHDIR)" || echo.
+	$(CP) $(TARGET) "X:\Desktop\X-Plane 10\Resources\plugins\$(PROJECT)\$(ARCHDIR)\"
 
-$(TARGET):	$(SRC) $(LIBS) Makefile.win
+$(TARGET):	clean $(SRC) Makefile.win
 	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
-AutoGate.c:	AutoGate.h
+autogate.c:	autogate.h
 
 clean:
 	$(RM) *~ *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl $(TARGET)
