@@ -1,4 +1,7 @@
+#!/usr/bin/python
+#
 # Given v7 and v8 objects at 6m, create versions at different heights
+#
 
 refheight=6
 cut=3

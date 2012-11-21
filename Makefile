@@ -23,5 +23,6 @@ $(PLUGIN):	$(PLUGIN_FILES)
 	zip -MM $(PLUGIN) $(PLUGIN_FILES)
 
 $(PACKAGE):	$(PACKAGE_FILES)
+	./clone.py
 	rm -f $(PACKAGE)
 	zip -MM $(PACKAGE) $(PACKAGE_FILES)
