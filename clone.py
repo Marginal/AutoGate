@@ -11,9 +11,9 @@ for obj in ['Safedock2S-%sm.obj',
             'Safegate-%sm.obj',
             'Safegate-%sm-pole.obj']:
     for height in [3, 3.5, 4, 4.5, 5, 5.5, 6.5, 7]:
-        infilename=("objs/"+obj) % refheight
+        infilename=("DGSs/"+obj) % refheight
         infile=file(infilename, 'rt')
-        outfilename=("objs/"+obj)% height
+        outfilename=("DGSs/"+obj)% height
         outfile=file(outfilename, 'wt')
         print outfilename
 
@@ -54,9 +54,9 @@ for obj in ['SA-%sm-Safedock2S-%sm.obj',
     for dist in [16, 18, 20, 22, 24]:
         for height in [4, 4.5, 5, 5.5, 6, 6.5, 7]:
             if height==refheight and dist==refdist: continue
-            infilename=("objs/"+obj) % (refdist, refheight)
+            infilename=("Standalone_DGSs/"+obj) % (refdist, refheight)
             infile=file(infilename, 'rt')
-            outfilename=("objs/"+obj)% (dist, height)
+            outfilename=("Standalone_DGSs/"+obj)% (dist, height)
             outfile=file(outfilename, 'wt')
             print outfilename
 
