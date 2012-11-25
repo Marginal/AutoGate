@@ -58,9 +58,10 @@ static XPLMDataRef floatref(char*, XPLMGetDataf_f, float*);
 static float getgate(XPLMDataRef);
 static float getdgs(XPLMDataRef);
 
+static void localpos(float, float, float, float, float *, float *, float *);
 static int updategate(void);
 static int updatedgs(void);
-static void updaterefs(void);
+static void updaterefs(float, float, float, float);
 
 static void drawdebug(XPLMWindowID, void *);
 

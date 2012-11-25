@@ -30,26 +30,26 @@ static XPLMDataRef ref_acf_tow_hook_Y, ref_acf_tow_hook_Z;	/* for finding cg */
 static XPLMDataRef ref_acf_door_x, ref_acf_door_y, ref_acf_door_z;
 static XPLMDataRef ref_total_running_time_sec;
 
-/* Published Datarefs */
+/* Published DataRefs */
 static XPLMDataRef ref_vert, ref_lat;
 static XPLMDataRef ref_status, ref_id1, ref_id2, ref_id3, ref_id4, ref_lr, ref_track;
 static XPLMDataRef ref_azimuth, ref_distance, ref_distance2;
 
-/* loc of plane's centreline opposite door in gate's space rel to stop */
-static float local_x, local_y, local_z;	
-
-static float gate_x, gate_y, gate_z, gate_h;	/* active gate */
-static float dgs_x, dgs_y, dgs_z, dgs_h;	/* active DGS */
-
-/* Published dataref values */
+/* Published DataRef values */
 static float lat, vert;
 static float status, id1, id2, id3, id4, lr, track;
 static float azimuth, distance, distance2;
 
+/* Internal state */
+static float last_x, last_y, last_z;		/* last object examined */
+static float last_update=0;			/* and the time we examined it */
+static float gate_x, gate_y, gate_z, gate_h;	/* active gate */
+static float dgs_x, dgs_y, dgs_z;		/* active DGS */
+
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
-    strcpy(outName, pluginName);
+    sprintf(outName, "%s v%.2f", pluginName, VERSION);
     strcpy(outSig,  pluginSig);
     strcpy(outDesc, pluginDesc);
 
@@ -172,9 +172,8 @@ static void newplane(void)
 static void resetidle(void)
 {
     state=IDLE;
-    local_x=local_y=local_z=0;
     gate_x=gate_y=gate_z=gate_h=0;
-    dgs_x=dgs_y=dgs_z=dgs_h=0;
+    dgs_x=dgs_y=dgs_z=0;
     vert=lat=0;
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -182,14 +181,8 @@ static void resetidle(void)
 
 static float getgate(XPLMDataRef inRefcon)
 {
-    /* loc of plane's cg when remaining vars were last calculated */
-    static float cache_x, cache_y, cache_z;
-
-    float plane_x, plane_y, plane_z, plane_hrad;
-    float object_x, object_y, object_z;
-    float object_h, object_hrad, object_hcos, object_hsin;
-    float x, y, z;
-    float loc_x, loc_y, loc_z;
+    float now, object_x, object_y, object_z, object_h;
+    float local_x, local_y, local_z;
 	
     if (state<IDLE) return 0;
 
@@ -200,35 +193,26 @@ static float getgate(XPLMDataRef inRefcon)
         /* We're tracking and it's not by this gate */
         return 0;
 
-    plane_x=XPLMGetDatad(ref_plane_x);
-    plane_y=XPLMGetDatad(ref_plane_y);
-    plane_z=XPLMGetDatad(ref_plane_z);
-    if (plane_x==cache_x && plane_y==cache_y && plane_z==cache_z)
-        /* We haven't moved since last calculation */
+    now=XPLMGetDataf(ref_total_running_time_sec);
+    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+        /* Same rendering pass and object as last calculation */
         return *(float*)inRefcon;
-	
-    plane_hrad=XPLMGetDataf(ref_plane_psi) * D2R;
-	
-    /* Location of plane's centreline opposite door */
-    /* Calculation assumes plane is horizontal */
-    x=plane_x-door_z*sin(plane_hrad);
-    y=plane_y+door_y;
-    z=plane_z+door_z*cos(plane_hrad);
+    else
+    {
+        last_update=now;
+        last_x=object_x;
+        last_y=object_y;
+        last_z=object_z;
+    }
 
-    /* Location of centreline opposite door in this gate's space */
-    object_h=XPLMGetDataf(ref_draw_object_psi);
-    object_hrad=object_h * D2R;
-    object_hcos=cos(object_hrad);
-    object_hsin=sin(object_hrad);
-    loc_x=object_hcos*(x-object_x)+object_hsin*(z-object_z);
-    loc_y=y-object_y;
-    loc_z=object_hcos*(z-object_z)-object_hsin*(x-object_x);
+    object_h=XPLMGetDataf(ref_draw_object_psi) * D2R;
+    localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);
 
-    if (fabs(loc_x)>CAP_X || loc_z<DGS_Z || loc_z>CAP_Z)
+    if (fabs(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
     {
         /* Not in range of this gate */
         if (gate_x==object_x && gate_y==object_y && gate_z==object_z)
-            resetidle();	/* Just gone out of range */
+            resetidle();	/* Just gone out of range of the tracking gate */
         return 0;
     }
 	    
@@ -242,25 +226,17 @@ static float getgate(XPLMDataRef inRefcon)
         gate_h=object_h;
     }
 	
-    local_x=loc_x; local_y=loc_y; local_z=loc_z;
-    cache_x=plane_x; cache_y=plane_y; cache_z=plane_z;
-
-    updaterefs();
+    updaterefs(now, local_x, local_y, local_z);
     return *(float*)inRefcon;
 }
 
+
 static float getdgs(XPLMDataRef inRefcon)
 {
-    /* loc of plane's cg when remaining vars were last calculated */
-    static float cache_x, cache_y, cache_z;
+    float now, object_x, object_y, object_z;
+    float local_x, local_y, local_z;
 
-    float plane_x, plane_y, plane_z, plane_hrad;
-    float object_x, object_y, object_z;
-    float gate_hrad, gate_hcos, gate_hsin;
-    float x, y, z;
-	
-    if (state<=IDLE)
-        return 0;
+    if (state<=IDLE) return 0;
 
     object_x=XPLMGetDataf(ref_draw_object_x);
     object_y=XPLMGetDataf(ref_draw_object_y);
@@ -270,11 +246,11 @@ static float getdgs(XPLMDataRef inRefcon)
     {
         /* Haven't yet identified the active dgs */
         float x, y, z;
+        float gate_hcos, gate_hsin;
 		
         /* Location of this dgs in the active gate's space */
-        gate_hrad=gate_h * D2R;
-        gate_hcos=cos(gate_hrad);
-        gate_hsin=sin(gate_hrad);
+        gate_hcos=cos(gate_h);
+        gate_hsin=sin(gate_h);
         x=gate_hcos*(object_x-gate_x) + gate_hsin*(object_z-gate_z);
         y=object_y-gate_y;
         z=gate_hcos*(object_z-gate_z) - gate_hsin*(object_x-gate_x);
@@ -283,49 +259,66 @@ static float getdgs(XPLMDataRef inRefcon)
             dgs_x=object_x;
             dgs_y=object_y;
             dgs_z=object_z;
-            dgs_h=XPLMGetDataf(ref_draw_object_psi);
         }
         else
             return 0;
     }
     else if (dgs_x!=object_x || dgs_y!=object_y || dgs_z!=object_z)
+        /*  Have identified the active dgs and this isn't it */
         return 0;
-	
-    /* Re-calculate plane location since gate may no longer be in view */
-    plane_x=XPLMGetDatad(ref_plane_x);
-    plane_y=XPLMGetDatad(ref_plane_y);
-    plane_z=XPLMGetDatad(ref_plane_z);
-    if (plane_x==cache_x && plane_y==cache_y && plane_z==cache_z)
-        /* We haven't moved since last calculation */
+
+    now=XPLMGetDataf(ref_total_running_time_sec);
+    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+        /* Same rendering pass and object as last calculation */
         return *(float*)inRefcon;
-
-    plane_hrad=XPLMGetDataf(ref_plane_psi) * D2R;
-
-    /* Location of centreline opposite door */
-    /* Calculation assumes plane is horizontal */
-    x=plane_x-door_z*sin(plane_hrad);
-    y=plane_y+door_y;
-    z=plane_z+door_z*cos(plane_hrad);
-
-    /* Location of centreline opposite door in this gate's space */
-    gate_hrad=gate_h * D2R;
-    gate_hcos=cos(gate_hrad);
-    gate_hsin=sin(gate_hrad);
-    local_x=gate_hcos*(x-gate_x)+gate_hsin*(z-gate_z);
-    local_y=y-gate_y;
-    local_z=gate_hcos*(z-gate_z)-gate_hsin*(x-gate_x);
-    cache_x=plane_x; cache_y=plane_y; cache_z=plane_z;
+    else
+    {
+        last_update=now;
+        last_x=object_x;
+        last_y=object_y;
+        last_z=object_z;
+    }
 	
-    updaterefs();
+    /* Re-calculate plane location - can't rely on values from getgate() since that will not be being called if gate no longer in view */
+    localpos(gate_x, gate_y, gate_z, gate_h, &local_x, &local_y, &local_z);
+
+    updaterefs(now, local_x, local_y, local_z);
     return *(float*)inRefcon;
 }
 
+
+/* Calculate location of plane's centreline opposite door in this object's space */
+static void localpos(float object_x, float object_y, float object_z, float object_h, float *local_x, float *local_y, float *local_z)
+{
+    float plane_x, plane_y, plane_z, plane_h;
+    float x, y, z;
+    float object_hcos, object_hsin;
+
+    plane_x=XPLMGetDatad(ref_plane_x);
+    plane_y=XPLMGetDatad(ref_plane_y);
+    plane_z=XPLMGetDatad(ref_plane_z);
+    plane_h=XPLMGetDataf(ref_plane_psi) * D2R;
+
+    /* Location of plane's centreline opposite door */
+    /* Calculation assumes plane is horizontal */
+    x=plane_x-door_z*sin(plane_h);
+    y=plane_y+door_y;
+    z=plane_z+door_z*cos(plane_h);
+
+    /* Location of centreline opposite door in this gate's space */
+    object_hcos=cos(object_h);
+    object_hsin=sin(object_h);
+    *local_x=object_hcos*(x-object_x)+object_hsin*(z-object_z);
+    *local_y=y-object_y;
+    *local_z=object_hcos*(z-object_z)-object_hsin*(x-object_x);
+}
+
+
 /* Update published data used by gate and dgs */
-static void updaterefs(void)
+static void updaterefs(float now, float local_x, float local_y, float local_z)
 {
     int running;
     int locgood=(fabs(local_x)<=AZI_X && fabs(local_z)<=GOOD_Z);
-    float now=XPLMGetDataf(ref_total_running_time_sec);
 	
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
 
@@ -484,13 +477,12 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     int left, top, right, bottom;
     float color[] = { 1.0, 1.0, 1.0 };	/* RGB White */
     int running;
-    int locgood=(fabs(local_x)<=AZI_X && fabs(local_z)<=GOOD_Z);
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
 
     XPLMGetWindowGeometry(inWindowID, &left, &top, &right, &bottom);
     XPLMDrawTranslucentDarkBox(left, top, right, bottom);
 
-    sprintf(buf, "State: %d %d %d %d", state, plane_type, locgood, running);
+    sprintf(buf, "State: %d %d %d", state, plane_type, running);
     XPLMDrawString(color, left + 5, top - 10, buf, 0, xplmFont_Basic);
     sprintf(buf, "Hook : %10.3f %10.3f %10.3f",       0.0, XPLMGetDataf(ref_acf_tow_hook_Y), XPLMGetDataf(ref_acf_tow_hook_Z));
     XPLMDrawString(color, left + 5, top - 20, buf, 0, xplmFont_Basic);
@@ -498,20 +490,17 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     XPLMDrawString(color, left + 5, top - 30, buf, 0, xplmFont_Basic);
     sprintf(buf, "Plane: %10.3f %10.3f %10.3f %6.2f", XPLMGetDatad(ref_plane_x), XPLMGetDatad(ref_plane_y), XPLMGetDatad(ref_plane_z), XPLMGetDataf(ref_plane_psi));
     XPLMDrawString(color, left + 5, top - 40, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Gate : %10.3f %10.3f %10.3f %6.2f", gate_x, gate_y, gate_z, gate_h);
+    sprintf(buf, "Gate : %10.3f %10.3f %10.3f %6.2f", gate_x, gate_y, gate_z, gate_h/D2R);
     XPLMDrawString(color, left + 5, top - 50, buf, 0, xplmFont_Basic);
-    sprintf(buf, "DGS  : %10.3f %10.3f %10.3f %6.2f", dgs_x, dgs_y, dgs_z, dgs_h);
+    sprintf(buf, "DGS  : %10.3f %10.3f %10.3f", dgs_x, dgs_y, dgs_z);
     XPLMDrawString(color, left + 5, top - 60, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Local: %10.3f %10.3f %10.3f",       local_x, local_y, local_z);
-    XPLMDrawString(color, left + 5, top - 70, buf, 0, xplmFont_Basic);
     sprintf(buf, "Time : %10.3f", timestamp);
-    XPLMDrawString(color, left + 5, top - 80, buf, 0, xplmFont_Basic);
+    XPLMDrawString(color, left + 5, top - 70, buf, 0, xplmFont_Basic);
     sprintf(buf, "Data : %6.3f %6.3f %1.0f %1.0f %1.0f %1.0f %1.0f %1.0f %1.0f %4.1f %4.1f %4.1f",
             lat, vert,
             status, id1, id2, id3, id4,
             lr, track,
             azimuth, distance, distance2);
-    XPLMDrawString(color, left + 5, top - 90, buf, 0, xplmFont_Basic);
+    XPLMDrawString(color, left + 5, top - 80, buf, 0, xplmFont_Basic);
 }				    
 #endif
-
