@@ -11,15 +11,20 @@ BUILD=-O3 -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=1 -DIBM=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -single_module -dynamiclib -flat_namespace -undefined warning -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -Wall -single_module -dynamiclib -flat_namespace -undefined dynamic_lookup -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
 
-OBJS=autogate.o
-TARGET=../$(PROJECT)/mac.xpl
+SRC=autogate.c
 LIBS=
+
+BUILDDIR=$(shell uname)
+OBJS=$(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
+TARGET=../$(PROJECT)/mac.xpl
 
 RM=rm -f
 CP=cp -p
 MD=mkdir -p
+
+.PHONY: all clean install
 
 all:	$(TARGET)
 
@@ -32,7 +37,14 @@ install:	$(TARGET)
 $(TARGET):	$(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@ $+
 
-autogate.c:	autogate.h
+$(BUILDDIR):
+	$(MD) $(BUILDDIR)
+
+$(BUILDDIR)/%.o:	%.c $(BUILDDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	$(RM) *~ *.bak *.o $(TARGET)
+	$(RM) *~ *.bak $(OBJS) $(TARGET)
+
+$(BUILDDIR)/autogate.o:	autogate.h
+$(BUILDDIR)/autogate.o:	autogate.h

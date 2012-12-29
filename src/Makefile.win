@@ -1,22 +1,24 @@
 # -*-Makefile-*- in NMAKE format
+# For VC2008 on x86. Assumes vcvarsall.bat x86|x86_amd64 has been run to set up environment vars.
 
 !include ..\version.mak
 
-!if "$(CPU)" == "x86"
-ARCHDIR=
-ARCHXP=
-!elseif "$(CPU)" == "amd64"
+# Work out which target we're set up for by looking for a program (ml64.exe) that only exists in the path for one target
+!if [ml64 >nul 2>&1] == 0
+CPU=x64
 ARCHDIR=64
 ARCHXP=_64
 !else
-! error CPU should be defined as x86 or amd64
+CPU=x86
+ARCHDIR=
+ARCHXP=
 !endif
 
 XPSDK=..\..\XPSDK211
 
 CC=cl
 #BUILD=-ZI -DDEBUG
-BUILD=-Ox -DNDEBUG
+BUILD=-Ox -GF -DNDEBUG
 DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)\CHeaders\XPLM -I$(XPSDK)/CHeaders/Widgets
 CFLAGS=-nologo -LD $(BUILD) $(DEFINES) $(INC)
@@ -33,16 +35,16 @@ all:	$(TARGET)
 
 install:	$(TARGET)
 !if "$(CPU)" == "x86"
-	$(MD) "X:\Desktop\X-Plane 9\Resources\plugins\$(PROJECT)\$(ARCHDIR)" || echo.
+	-$(MD) "X:\Desktop\X-Plane 9\Resources\plugins\$(PROJECT)\$(ARCHDIR)"
 	$(CP) $(TARGET) "X:\Desktop\X-Plane 9\Resources\plugins\$(PROJECT)\$(ARCHDIR)\"
 !endif
-	$(MD) "X:\Desktop\X-Plane 10\Resources\plugins\$(PROJECT)\$(ARCHDIR)" || echo.
+	-$(MD) "X:\Desktop\X-Plane 10\Resources\plugins\$(PROJECT)\$(ARCHDIR)"
 	$(CP) $(TARGET) "X:\Desktop\X-Plane 10\Resources\plugins\$(PROJECT)\$(ARCHDIR)\"
 
-$(TARGET):	clean $(SRC) Makefile.win
+$(TARGET):	clean $(SRC)
 	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
-autogate.c:	autogate.h
-
 clean:
-	$(RM) *~ *.bak *.exp *.idb *.ilk *.lib *.obj *.pdb *.xpl $(TARGET)
+	-$(RM) *~ *.bak *.obj $(TARGET:.xpl=).*
+
+autogate.c:	autogate.h

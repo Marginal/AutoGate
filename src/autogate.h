@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "XPLMDataAccess.h"
 #include "XPLMDisplay.h"
@@ -59,11 +60,11 @@ static float getgate(XPLMDataRef);
 static float getdgs(XPLMDataRef);
 
 static void localpos(float, float, float, float, float *, float *, float *);
-static int updategate(void);
-static int updatedgs(void);
 static void updaterefs(float, float, float, float);
 
+#ifdef DEBUG
 static void drawdebug(XPLMWindowID, void *);
+#endif
 
 
 /* types */
@@ -92,7 +93,7 @@ const db_t planedb[]={/* lng   lat  vert  type */
     {"A340",	19.6, -8.0, -1.2,  4},
     {"A350",	   0,    0,    0,  5},
     {"A380",	23.0, -9.7, -6.0,  6}, /* first door */
-    /*	{"A380",	56.5, -11,  -6.0,  6}, /* second door */
+    //	{"A380",	56.5, -11,  -6.0,  6}, /* second door */
     {"717",	   0,    0,    0,  7},
     {"737-700",	15.0, -6.0, -1.2,  8},
     {"737 800",	16.8, -5.2, -1.5,  8},	/* xpfw b26*/

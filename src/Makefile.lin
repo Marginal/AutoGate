@@ -1,14 +1,7 @@
 # -*-Makefile-*-
+# Setup for building on Ubuntu x86_64 with multilib support
 
 include ../version.mak
-
-ifeq ($(shell arch), i686)
-ARCHDIR=
-else ifeq ($(shell arch), x86_64)
-ARCHDIR=64
-else
-$(error unknown architecture $(shell arch))
-endif
 
 XPSDK=../../XPSDK211
 
@@ -19,30 +12,56 @@ BUILD=-O3 -s -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=0 -DIBM=0 -DLIN=1 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)/CHeaders/XPLM -I$(XPSDK)/CHeaders/Widgets
-CFLAGS=-shared -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-pipe -Wall -static-libgcc -shared  -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
 
-OBJS=autogate.o
-TARGET=../$(PROJECT)/$(ARCHDIR)/lin.xpl
-LIBS=-lGLU -lGL
+SRC=autogate.c
+LIBS=
+
+BUILD_32=$(shell uname)32
+OBJS_32=$(addprefix $(BUILD_32)/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
+TARGET_32=../$(PROJECT)/lin.xpl
+BUILD_64=$(shell uname)64
+OBJS_64=$(addprefix $(BUILD_64)/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
+TARGET_64=../$(PROJECT)/64/lin.xpl
+
+TARGET=$(TARGET_32) $(TARGET_64)
 
 RM=rm -f
 CP=cp -p
 MD=mkdir -p
 
-all:	$(TARGET)
+.PHONY: all clean install
 
-install:	$(TARGET)
-ifeq ($(shell arch), i686)
-	$(MD) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/$(ARCHDIR)
-	$(CP) $(TARGET) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/$(ARCHDIR)/
-endif
-	$(MD) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/$(ARCHDIR)
-	$(CP) $(TARGET) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/$(ARCHDIR)/
+all:	$(TARGET_32) $(TARGET_64)
 
-$(TARGET):	$(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@ $+
+install:	$(TARGET_32) $(TARGET_64)
+	$(MD) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)
+	$(CP) $(TARGET_32) /media/jonathan/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/
+	$(MD) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)
+	$(CP) $(TARGET_32) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/
+	$(MD) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/64
+	$(CP) $(TARGET_64) /media/jonathan/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/64/
 
-autogate.c:	autogate.h
+$(TARGET_32):	$(OBJS_32)
+	$(CC) $(CFLAGS) $(LDFLAGS) -m32 $(LIBS) -o $@ $+
+
+$(TARGET_64):	$(OBJS_64)
+	$(CC) $(CFLAGS) $(LDFLAGS) -m64 $(LIBS) -o $@ $+
+
+$(BUILD_32):
+	$(MD) $(BUILD_32)
+
+$(BUILD_64):
+	$(MD) $(BUILD_64)
+
+$(BUILD_32)/%.o:	%.c $(BUILD_32)
+	$(CC) $(CFLAGS) -m32 -c -o $@ $<
+
+$(BUILD_64)/%.o:	%.c $(BUILD_64)
+	$(CC) $(CFLAGS) -m64 -c -o $@ $<
 
 clean:
-	$(RM) *~ *.bak *.o $(TARGET)
+	$(RM) *~ *.bak $(OBJS_32) $(OBJS_64) $(TARGET_32) $(TARGET_64)
+
+$(BUILD_32)/autogate.o:	autogate.h
+$(BUILD_64)/autogate.o:	autogate.h

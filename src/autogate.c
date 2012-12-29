@@ -245,14 +245,13 @@ static float getdgs(XPLMDataRef inRefcon)
     if (!(dgs_x || dgs_y || dgs_z))
     {
         /* Haven't yet identified the active dgs */
-        float x, y, z;
+        float x, z;
         float gate_hcos, gate_hsin;
 		
         /* Location of this dgs in the active gate's space */
         gate_hcos=cos(gate_h);
         gate_hsin=sin(gate_h);
         x=gate_hcos*(object_x-gate_x) + gate_hsin*(object_z-gate_z);
-        y=object_y-gate_y;
         z=gate_hcos*(object_z-gate_z) - gate_hsin*(object_x-gate_x);
         if (fabs(x)<=DGS_X && z<=0 && z>=DGS_Z)
         {
@@ -461,6 +460,10 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             /* Go back to lead-in */
             state=TRACK;
         break;
+
+    default:
+        /* Shouldn't be here if state<=IDLE */
+        assert(0);
     }
 }
 
