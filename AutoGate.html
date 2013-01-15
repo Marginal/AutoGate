@@ -126,7 +126,7 @@ kbd {font-family: sans-serif; color: white; background-color: black; border: 1px
   <li>First, copy one or more of the <code>AutoGate-*.obj</code> jetway objects from the <code>Jetways</code> folder into your scenery package;
     <ul>
       <li>OverlayEditor: Use the <samp>Import</samp> button and navigate to the <code>Jetways</code> folder.</li>
-      <li>WED: Use Finder or Explorer to copy the jetway object(s) plus the associated texture <code>AutoGate2.dds</code> from the <code>Jetways</code> folder into your scenery package folder.</li>
+      <li>WED: Use Finder or Explorer to copy the jetway object(s) plus the associated textures <code>AutoGate2.dds</code> + <code>AutoGate2_LIT.dds</code> from the <code>Jetways</code> folder into your scenery package folder.</li>
     </ul>
   </li>
   <li>Place the jetway objects in your scenery package just like any other 3D object. The jetways should be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
@@ -198,8 +198,8 @@ kbd {font-family: sans-serif; color: white; background-color: black; border: 1px
 
 <h4>Jetways</h4>
 
-<p>The static and animated glass and steel jetway objects all share a common texture file <code>AutoGate2.dds</code> from the <code>Jetways</code> folder. You can edit or replace this file in your scenery package folder. The file <code>PaintKit.png</code> also in the <code>Jetways</code> folder describes how this texture maps to the jetway objects.</p>
-<p>You can edit the object files in a text editor to change the name of the texture file specified in the <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_lttex_file_namegt" target="_blank">TEXTURE<a></code> statement, and save the object with a different filename. This allows you to have a mix of differently textured jetways. <small>(Note that the spacing rules described above still apply irrespective of the objects' filenames)</small>.</p>
+<p>The static and animated glass and steel jetway objects all share common texture files <code>AutoGate2.dds</code> and <code>AutoGate2_LIT.dds</code> from the <code>Jetways</code> folder. You can edit or replace these file in your scenery package folder. The file <code>PaintKit.png</code> also in the <code>Jetways</code> folder describes how these textures map to the jetway objects.</p>
+<p>You can edit the object files in a text editor to change the name of the texture files specified in the <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_lttex_file_namegt" target="_blank">TEXTURE<a></code> and <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_LIT_lttex_file_namegt" target="_blank">TEXTURE_LIT<a></code> statements, and save the object with a different filename. This allows you to have a mix of differently textured jetways. <small>(Note that the spacing rules described above still apply irrespective of the objects' filenames)</small>.</p>
 <p>The static, animated and extension/connector glass jetways are drawn in &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ATTR_layer_group_ltnamegt_ltoffsetgt" target="_blank">layer group</a>&rdquo; objects+4, objects+3 and objects+2 respectively, so that other scenery objects (which are normally drawn in layer group objects+0) can be viewed through the glass windows. If you have a number of glass objects at a gate you may need to change the <code>ATTR_layer_group objects <i>n</i></code> statements in some of the object files to change their relative drawing order; <i>i.e.</i> so that objects further from the terminal building are drawn later than objects closer to the terminal building.</p>
 
 <h4>Docking Guidance Systems</h4>
