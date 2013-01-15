@@ -2,7 +2,7 @@
 
 include ../version.mak
 
-XPSDK=../../XPSDK211
+XPSDK=../../XPSDK212
 
 CC=gcc
 #BUILD=-g -DDEBUG
@@ -10,11 +10,11 @@ CC=gcc
 BUILD=-O3 -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=1 -DIBM=0 -DLIN=0 -DVERSION=$(VERSION)
-INC=-I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -Wall -single_module -dynamiclib -flat_namespace -undefined dynamic_lookup -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
+INC=-F$(XPSDK)/Libraries/Mac -I$(XPSDK)/CHeaders/XPLM
+CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -Wall -single_module -dynamiclib -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
 
 SRC=autogate.c
-LIBS=
+LIBS=-framework XPLM
 
 BUILDDIR=$(shell uname)
 OBJS=$(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(notdir $(SRC)))))

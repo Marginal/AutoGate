@@ -3,7 +3,7 @@
 
 include ../version.mak
 
-XPSDK=../../XPSDK211
+XPSDK=../../XPSDK212
 
 CC=gcc
 #BUILD=-g -DDEBUG
