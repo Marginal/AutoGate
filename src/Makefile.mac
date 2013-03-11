@@ -11,14 +11,21 @@ BUILD=-O3 -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=1 -DIBM=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-F$(XPSDK)/Libraries/Mac -I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-arch ppc -arch i586 -arch x86_64 -pipe -Wall -single_module -dynamiclib -fvisibility=hidden -mmacosx-version-min=10.4 $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-arch i386 -arch x86_64 -march=core2 -ffast-math -pipe -Wall -bundle -fvisibility=hidden -mmacosx-version-min=10.5 $(BUILD) $(DEFINES) $(INC)
 
+VPATH=
 SRC=autogate.c
 LIBS=-framework XPLM
+TARGETDIR=../$(PROJECT)
+XPLANE9=~/Desktop/X-Plane\ 9
+XPLANE10=~/Desktop/X-Plane\ 10
+
+############################################################################
 
 BUILDDIR=$(shell uname)
 OBJS=$(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
-TARGET=../$(PROJECT)/mac.xpl
+TARGET=$(TARGETDIR)/mac.xpl
+INSTALLDIR=Resources/plugins/$(PROJECT)
 
 RM=rm -f
 CP=cp -p
@@ -28,23 +35,33 @@ MD=mkdir -p
 
 all:	$(TARGET)
 
-install:	$(TARGET)
-	$(MD) ~/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)
-	$(CP) $(TARGET) ~/Desktop/X-Plane\ 9/Resources/plugins/$(PROJECT)/
-	$(MD) ~/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)
-	$(CP) $(TARGET) ~/Desktop/X-Plane\ 10/Resources/plugins/$(PROJECT)/
+install:	$(TARGET) | $(XPLANE9)/$(INSTALLDIR) $(XPLANE10)/$(INSTALLDIR)
+	$(CP) $(TARGET) $(XPLANE9)/$(INSTALLDIR)/
+	$(CP) $(TARGET) $(XPLANE10)/$(INSTALLDIR)/
 
-$(TARGET):	$(OBJS)
+$(TARGET):	$(OBJS) | $(TARGETDIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@ $+
+
+$(OBJS): | $(BUILDDIR)
 
 $(BUILDDIR):
 	$(MD) $(BUILDDIR)
 
-$(BUILDDIR)/%.o:	%.c $(BUILDDIR)
+$(BUILDDIR)/%.o:	%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(BUILD) $(DEFINES) $(INC) -MM $< | sed -e 's|$*.o|$@|' > $(@:.o=.d)
+
+$(TARGETDIR):
+	$(MD) $(TARGETDIR)
+
+$(XPLANE9)/$(INSTALLDIR):
+	$(MD) $(XPLANE9)/$(INSTALLDIR)
+
+$(XPLANE10)/$(INSTALLDIR):
+	$(MD) $(XPLANE10)/$(INSTALLDIR)
 
 clean:
-	$(RM) *~ *.bak $(OBJS) $(TARGET)
+	$(RM) *~ *.bak $(OBJS) $(OBJS:.o=.d) $(TARGET)
 
-$(BUILDDIR)/autogate.o:	autogate.h
-$(BUILDDIR)/autogate.o:	autogate.h
+# pull in dependency info
+-include $(OBJS:.o=.d)
