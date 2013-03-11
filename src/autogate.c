@@ -23,7 +23,7 @@ static float door_x, door_y, door_z;		/* door offset relative to ref point */
 
 /* Datarefs */
 static XPLMDataRef ref_plane_x, ref_plane_y, ref_plane_z, ref_plane_psi;
-static XPLMDataRef ref_ENGN_running;
+static XPLMDataRef ref_ENGN_running, ref_parkingbrake;
 static XPLMDataRef ref_draw_object_x, ref_draw_object_y, ref_draw_object_z, ref_draw_object_psi;
 static XPLMDataRef ref_acf_descrip, ref_acf_icao;
 static XPLMDataRef ref_acf_tow_hook_Y, ref_acf_tow_hook_Z;	/* for finding cg */
@@ -59,6 +59,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     ref_plane_z        =XPLMFindDataRef("sim/flightmodel/position/local_z");
     ref_plane_psi      =XPLMFindDataRef("sim/flightmodel/position/psi");
     ref_ENGN_running   =XPLMFindDataRef("sim/flightmodel/engine/ENGN_running");
+    ref_parkingbrake   =XPLMFindDataRef("sim/flightmodel/controls/parkbrake");
     ref_draw_object_x  =XPLMFindDataRef("sim/graphics/animation/draw_object_x");
     ref_draw_object_y  =XPLMFindDataRef("sim/graphics/animation/draw_object_y");
     ref_draw_object_z  =XPLMFindDataRef("sim/graphics/animation/draw_object_z");
@@ -320,6 +321,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
     int locgood=(fabs(local_x)<=AZI_X && fabs(local_z)<=GOOD_Z);
 	
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
+    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
 
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -481,6 +483,7 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     float color[] = { 1.0, 1.0, 1.0 };	/* RGB White */
     int running;
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
+    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
 
     XPLMGetWindowGeometry(inWindowID, &left, &top, &right, &bottom);
     XPLMDrawTranslucentDarkBox(left, top, right, bottom);
