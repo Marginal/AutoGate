@@ -22,9 +22,9 @@ Operation
   and offset from the stopping point. For details refer to the accompanying file
   "Pilot Instructions, Type 2S display.pdf".
 * The AutoGate animated jetway (if included in the scenery package) will dock 
-  with your plane once you have stopped your engines.
+  with your plane once you have engaged the parking brake and stopped your engines.
 * On departure, the AutoGate animated jetway will undock from your plane when
-  you start your engines.
+  you disengage the parking brake and/or start your engines.
 
 
 Compatible Planes
@@ -35,6 +35,6 @@ Compatible Planes
   correct "ICAO code" has been entered on the Standard->Viewpoint screen.
 
 
-Version 1.40
+Version 1.41
 Copyright Jonathan Harris 2006-2013
 http://marginal.org.uk/x-planescenery/
