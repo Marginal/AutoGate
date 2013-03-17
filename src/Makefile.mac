@@ -11,7 +11,7 @@ BUILD=-O3 -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=1 -DIBM=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-F$(XPSDK)/Libraries/Mac -I$(XPSDK)/CHeaders/XPLM
-CFLAGS=-arch i386 -arch x86_64 -march=core2 -ffast-math -pipe -Wall -bundle -fvisibility=hidden -mmacosx-version-min=10.5 $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-arch ppc -arch i386 -arch x86_64 -ffast-math -pipe -Wall -bundle -fvisibility=hidden -mmacosx-version-min=10.5 $(BUILD) $(DEFINES) $(INC)
 
 VPATH=
 SRC=autogate.c
