@@ -26,7 +26,7 @@ static XPLMDataRef ref_plane_x, ref_plane_y, ref_plane_z, ref_plane_psi;
 static XPLMDataRef ref_ENGN_running, ref_parkingbrake;
 static XPLMDataRef ref_draw_object_x, ref_draw_object_y, ref_draw_object_z, ref_draw_object_psi;
 static XPLMDataRef ref_acf_descrip, ref_acf_icao;
-static XPLMDataRef ref_acf_tow_hook_Y, ref_acf_tow_hook_Z;	/* for finding cg */
+static XPLMDataRef ref_acf_cg_y, ref_acf_cg_z;
 static XPLMDataRef ref_acf_door_x, ref_acf_door_y, ref_acf_door_z;
 static XPLMDataRef ref_total_running_time_sec;
 
@@ -66,8 +66,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     ref_draw_object_psi=XPLMFindDataRef("sim/graphics/animation/draw_object_psi");
     ref_acf_descrip    =XPLMFindDataRef("sim/aircraft/view/acf_descrip");
     ref_acf_icao       =XPLMFindDataRef("sim/aircraft/view/acf_ICAO");
-    ref_acf_tow_hook_Y =XPLMFindDataRef("sim/aircraft/overflow/acf_tow_hook_Y");
-    ref_acf_tow_hook_Z =XPLMFindDataRef("sim/aircraft/overflow/acf_tow_hook_Z");
+    ref_acf_cg_y       =XPLMFindDataRef("sim/aircraft/weight/acf_cgY_original");
+    ref_acf_cg_z       =XPLMFindDataRef("sim/aircraft/weight/acf_cgZ_original");
     ref_acf_door_x     =XPLMFindDataRef("sim/aircraft/view/acf_door_x");
     ref_acf_door_y     =XPLMFindDataRef("sim/aircraft/view/acf_door_y");
     ref_acf_door_z     =XPLMFindDataRef("sim/aircraft/view/acf_door_z");
@@ -163,9 +163,9 @@ static void newplane(void)
                 plane_type=planedb[i].type;
                 if (!door_x)
                 {
-                    door_x=F2M*planedb[i].lat;
-                    door_y=F2M*planedb[i].vert + XPLMGetDataf(ref_acf_tow_hook_Y);
-                    door_z=F2M*planedb[i].lng  + XPLMGetDataf(ref_acf_tow_hook_Z);
+                    door_x = F2M * planedb[i].lat;
+                    door_y = F2M * (planedb[i].vert - XPLMGetDataf(ref_acf_cg_y));	/* Adjust relative to static cog */
+                    door_z = F2M * (planedb[i].lng  - XPLMGetDataf(ref_acf_cg_z));	/* Adjust relative to static cog */
                 }
                 break;
             }
@@ -523,8 +523,6 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
 
     sprintf(buf, "State: %d %d %d", state, plane_type, running);
     XPLMDrawString(color, left + 5, top - 10, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Hook : %10.3f %10.3f %10.3f",       0.0, XPLMGetDataf(ref_acf_tow_hook_Y), XPLMGetDataf(ref_acf_tow_hook_Z));
-    XPLMDrawString(color, left + 5, top - 20, buf, 0, xplmFont_Basic);
     sprintf(buf, "Door : %10.3f %10.3f %10.3f",       XPLMGetDataf(ref_acf_door_x), XPLMGetDataf(ref_acf_door_y), XPLMGetDataf(ref_acf_door_z));
     XPLMDrawString(color, left + 5, top - 30, buf, 0, xplmFont_Basic);
     sprintf(buf, "Plane: %10.3f %10.3f %10.3f %6.2f", XPLMGetDataf(ref_plane_x), XPLMGetDataf(ref_plane_y), XPLMGetDataf(ref_plane_z), XPLMGetDataf(ref_plane_psi));
