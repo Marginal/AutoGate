@@ -6,13 +6,13 @@ include ../version.mak
 XPSDK=../../XPSDK212
 
 CC=gcc
-#BUILD=-g -DDEBUG
-#LDFLAGS=
+BUILD=-g -DDEBUG
+LDFLAGS=
 BUILD=-O3 -s -DNDEBUG
 LDFLAGS=-Wl,-x
 DEFINES=-DAPL=0 -DIBM=0 -DLIN=1 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)/CHeaders/XPLM -I$(XPSDK)/CHeaders/Widgets
-CFLAGS=-march=core2 -ffast-math -pipe -Wall -static-libgcc -shared -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
+CFLAGS=-march=core2 -ffast-math -pipe -Wall -Wdouble-promotion -Winline -Wno-missing-braces -static-libgcc -shared -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
 
 VPATH=
 SRC=autogate.c

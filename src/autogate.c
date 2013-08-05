@@ -222,7 +222,7 @@ static float getgate(XPLMDataRef inRefcon)
     object_h=XPLMGetDataf(ref_draw_object_psi) * D2R;
     localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);
 
-    if (fabs(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
+    if (fabsf(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
     {
         /* Not in range of this gate */
         if (gate_x==object_x && gate_y==object_y && gate_z==object_z)
@@ -233,20 +233,20 @@ static float getgate(XPLMDataRef inRefcon)
     if (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z)
     {
         /* Just come into range */
-        if (state == NEWPLANE && fabs(local_z) < NEW_Z)
+        if (state == NEWPLANE && fabsf(local_z) < NEW_Z)
         {
             /* Fudge plane's position to line up with this gate */
             float object_hcos, object_hsin;
             int running;
 
-            object_hcos=cos(object_h);
-            object_hsin=sin(object_h);
-            XPLMSetDatad(ref_plane_x, XPLMGetDatad(ref_plane_x) + local_z * object_hsin - local_x * object_hcos);
-            XPLMSetDatad(ref_plane_z, XPLMGetDatad(ref_plane_z) - local_z * object_hcos - local_x * object_hsin);
+            object_hcos = cosf(object_h);
+            object_hsin = sinf(object_h);
+            XPLMSetDataf(ref_plane_x, XPLMGetDataf(ref_plane_x) + local_z * object_hsin - local_x * object_hcos);
+            XPLMSetDataf(ref_plane_z, XPLMGetDataf(ref_plane_z) - local_z * object_hcos - local_x * object_hsin);
             localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);	/* recalc */
 
             XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
-            running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
+            running |= (XPLMGetDataf(ref_parkingbrake) < 0.5f);
             state = running ? TRACK : DOCKED;
         }
         else
@@ -283,11 +283,11 @@ static float getdgs(XPLMDataRef inRefcon)
         float gate_hcos, gate_hsin;
 		
         /* Location of this dgs in the active gate's space */
-        gate_hcos=cos(gate_h);
-        gate_hsin=sin(gate_h);
+        gate_hcos = cosf(gate_h);
+        gate_hsin = sinf(gate_h);
         x=gate_hcos*(object_x-gate_x) + gate_hsin*(object_z-gate_z);
         z=gate_hcos*(object_z-gate_z) - gate_hsin*(object_x-gate_x);
-        if (fabs(x)<=DGS_X && z<=0 && z>=DGS_Z)
+        if (fabsf(x)<=DGS_X && z<=0 && z>=DGS_Z)
         {
             dgs_x=object_x;
             dgs_y=object_y;
@@ -327,20 +327,20 @@ static void localpos(float object_x, float object_y, float object_z, float objec
     float x, y, z;
     float object_hcos, object_hsin;
 
-    plane_x=XPLMGetDatad(ref_plane_x);
-    plane_y=XPLMGetDatad(ref_plane_y);
-    plane_z=XPLMGetDatad(ref_plane_z);
+    plane_x=XPLMGetDataf(ref_plane_x);
+    plane_y=XPLMGetDataf(ref_plane_y);
+    plane_z=XPLMGetDataf(ref_plane_z);
     plane_h=XPLMGetDataf(ref_plane_psi) * D2R;
 
     /* Location of plane's centreline opposite door */
     /* Calculation assumes plane is horizontal */
-    x=plane_x-door_z*sin(plane_h);
+    x=plane_x-door_z*sinf(plane_h);
     y=plane_y+door_y;
-    z=plane_z+door_z*cos(plane_h);
+    z=plane_z+door_z*cosf(plane_h);
 
     /* Location of centreline opposite door in this gate's space */
-    object_hcos=cos(object_h);
-    object_hsin=sin(object_h);
+    object_hcos = cosf(object_h);
+    object_hsin = sinf(object_h);
     *local_x=object_hcos*(x-object_x)+object_hsin*(z-object_z);
     *local_y=y-object_y;
     *local_z=object_hcos*(z-object_z)-object_hsin*(x-object_x);
@@ -351,10 +351,10 @@ static void localpos(float object_x, float object_y, float object_z, float objec
 static void updaterefs(float now, float local_x, float local_y, float local_z)
 {
     int running;
-    int locgood=(fabs(local_x)<=AZI_X && fabs(local_z)<=GOOD_Z);
+    int locgood=(fabsf(local_x)<=AZI_X && fabsf(local_z)<=GOOD_Z);
 	
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
-    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
+    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5f);
 
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -381,7 +381,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             else
                 id4=plane_type-11;
             if (local_z-GOOD_Z > AZI_Z ||
-                fabs(local_x) > AZI_X)
+                fabsf(local_x) > AZI_X)
                 track=1;	/* lead-in only */
             else
             {
@@ -389,9 +389,9 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
                 azimuth=((float)((int)(local_x*2))) / 2;
                 if (azimuth>4)	azimuth=4;
                 if (azimuth<-4) azimuth=-4;
-                if (azimuth<=-0.5)
+                if (azimuth<=-0.5f)
                     lr=1;
-                else if (azimuth>=0.5)
+                else if (azimuth>=0.5f)
                     lr=2;
                 else
                     lr=0;
@@ -491,7 +491,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
 
     case DISENGAGED:
         /* Blank */
-        if (local_z-GOOD_Z > AZI_Z || fabs(local_x) > AZI_X)
+        if (local_z-GOOD_Z > AZI_Z || fabsf(local_x) > AZI_X)
             /* Go back to lead-in */
             state=TRACK;
         break;
@@ -527,7 +527,7 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     XPLMDrawString(color, left + 5, top - 20, buf, 0, xplmFont_Basic);
     sprintf(buf, "Door : %10.3f %10.3f %10.3f",       XPLMGetDataf(ref_acf_door_x), XPLMGetDataf(ref_acf_door_y), XPLMGetDataf(ref_acf_door_z));
     XPLMDrawString(color, left + 5, top - 30, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Plane: %10.3f %10.3f %10.3f %6.2f", XPLMGetDatad(ref_plane_x), XPLMGetDatad(ref_plane_y), XPLMGetDatad(ref_plane_z), XPLMGetDataf(ref_plane_psi));
+    sprintf(buf, "Plane: %10.3f %10.3f %10.3f %6.2f", XPLMGetDataf(ref_plane_x), XPLMGetDataf(ref_plane_y), XPLMGetDataf(ref_plane_z), XPLMGetDataf(ref_plane_psi));
     XPLMDrawString(color, left + 5, top - 40, buf, 0, xplmFont_Basic);
     sprintf(buf, "Gate : %10.3f %10.3f %10.3f %6.2f", gate_x, gate_y, gate_z, gate_h/D2R);
     XPLMDrawString(color, left + 5, top - 50, buf, 0, xplmFont_Basic);
