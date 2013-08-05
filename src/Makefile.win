@@ -1,4 +1,5 @@
 # -*-Makefile-*- in NMAKE format
+# Makes 32bit & 64bit version for X-Plane 10+, plus 32bit version without SSE2 for X-Plane 9
 
 !include ..\version.mak
 
@@ -8,36 +9,27 @@ CC=cl
 #BUILD=-Zi -DDEBUG
 BUILD=-O2 -DNDEBUG
 DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
-INC=-I$(XPSDK)\CHeaders\XPLM -I$(XPSDK)/CHeaders/Widgets
-CFLAGS=-nologo -fp:fast $(BUILD) $(DEFINES) $(INC)
-LDFLAGS=-LD
+INC=-I$(XPSDK)\CHeaders\XPLM
+CFLAGS=-nologo -fp:fast -LD $(BUILD) $(DEFINES) $(INC)
 
 SRC=.\autogate.c
-LIBS=$(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib $(XPSDK)\Libraries\Win\XPWidgets$(ARCHXP).lib
 TARGETDIR=..\$(PROJECT)
 XPLANE9=X:\Desktop\X-Plane 9
 XPLANE10=X:\Desktop\X-Plane 10
+INSTALLDIR=Resources\plugins\$(PROJECT)
 
-############################################################################
-
-OBJS=$(SRC:.c=.obj)
 # Work out which target we're set up for by looking for a program (ml64.exe) that only exists in the path for one target
 !if [ml64 >nul 2>&1] == 0
 CPU=x64
-ARCHDIR=64
 ARCHXP=_64
-BUILDDIR=Win64
-OBJS=$(OBJS:.\=Win64\)
+TARGET=$(TARGETDIR)\64\win.xpl
 !else
-CFLAGS=$(CFLAGS) -arch:SSE2
 CPU=x86
-ARCHDIR=
 ARCHXP=
-BUILDDIR=Win32
-OBJS=$(OBJS:.\=Win32\)
+TARGET=$(TARGETDIR)\32\win.xpl $(TARGETDIR)\win.xpl
 !endif
-TARGET=$(TARGETDIR)\$(ARCHDIR)\win.xpl
-INSTALLDIR=Resources\plugins\$(PROJECT)\$(ARCHDIR)
+
+LIBS=$(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib
 
 RM=del /q
 CP=copy /y
@@ -47,26 +39,31 @@ all:	$(TARGET)
 
 install:	$(TARGET)
 !if "$(CPU)" == "x86"
-	-@if not exist "$(XPLANE9)\$(INSTALLDIR)\$(ARCHDIR)" $(MD) "$(XPLANE9)\$(INSTALLDIR)\$(ARCHDIR)"
-	$(CP) $(TARGET) "$(XPLANE9)\$(INSTALLDIR)\$(ARCHDIR)"
+	-$(MD) "$(XPLANE9)\$(INSTALLDIR)\"
+	$(CP) $(TARGETDIR)\win.xpl "$(XPLANE9)\$(INSTALLDIR)\"
+	-$(MD) "$(XPLANE10)\$(INSTALLDIR)\32"
+	$(CP) $(TARGETDIR)\32\win.xpl "$(XPLANE10)\$(INSTALLDIR)\32\"
+!else
+	-$(MD) "$(XPLANE10)\$(INSTALLDIR)\64\"
+	$(CP) $(TARGETDIR)\64\win.xpl "$(XPLANE10)\$(INSTALLDIR)\64\"
 !endif
-	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\$(ARCHDIR)" $(MD) "$(XPLANE10)\$(INSTALLDIR)\$(ARCHDIR)"
-	$(CP) $(TARGET) "$(XPLANE10)\$(INSTALLDIR)\$(ARCHDIR)"
 
-$(TARGET):	$(OBJS)
-	-@if not exist "$(TARGETDIR)\$(ARCHDIR)" $(MD) "$(TARGETDIR)\$(ARCHDIR)"
-	$(CC) $(CFLAGS) $(LDFLAGS) -Fe$@ $(OBJS) $(LIBS)
+$(TARGETDIR)\win.xpl:
+	-@if not exist "$(TARGETDIR)" $(MD) "$(TARGETDIR)"
+	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
-.c{$(BUILDDIR)}.obj:
-	$(CC) $(CFLAGS) -c -Fo$@ -Fd$* $<
-	@echo $@: $< \> $*.dep
-	@for /f "usebackq tokens=4*" %i in (`"$(CC) $(CFLAGS) /Zs /Z7 /showIncludes $< 2>nul:"`) do @echo. "%i %j" \>> $*.dep
-	@echo.>> $*.dep
+$(TARGETDIR)\32\win.xpl:
+	-@if not exist "$(TARGETDIR)\32" $(MD) "$(TARGETDIR)\32"
+	$(CC) -arch:SSE2 $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
+
+$(TARGETDIR)\64\win.xpl:
+	-@if not exist "$(TARGETDIR)\64" $(MD) "$(TARGETDIR)\64"
+	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
 clean:
-	-$(RM) *~ *.bak $(OBJS:.obj=.*) $(BUILDDIR)\Makefile.dep $(TARGET:.xpl=.*) 2>nul:
+	-$(RM) *~ *.bak *.obj
+	-$(RM) $(TARGETDIR)\win.*
+	-$(RM) $(TARGETDIR)\32\win.*
+	-$(RM) $(TARGETDIR)\64\win.*
 
-# pull in dependency info
-!if [$(MD) $(BUILDDIR) 2>nul: & type $(OBJS:.obj=.dep) > $(BUILDDIR)\Makefile.dep 2>nul:]
-!endif
-!include $(BUILDDIR)\Makefile.dep
+autogate.c:	autogate.h
