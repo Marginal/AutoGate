@@ -37,6 +37,7 @@ const float OBJ_Y=  4;
 const float CAP_X = 10;
 const float CAP_Z = 70;	/* (50-80 in Safedock2 flier) */
 const float GOOD_Z= 0.5;
+const float NEW_Z = 10;	/* Max distance to fudge new Ramp Start */
 
 /* DGS distances [m]     (to door location, not ref point) */
 const float AZI_X = 5;	/* Azimuth guidance */
@@ -70,7 +71,7 @@ static void drawdebug(XPLMWindowID, void *);
 /* types */
 typedef enum
 {
-    DISABLED=0, IDFAIL, IDLE, TRACK, GOOD, BAD, ENGAGE, DOCKED, DISENGAGE, DISENGAGED
+    DISABLED=0, IDFAIL, NEWPLANE, IDLE, TRACK, GOOD, BAD, ENGAGE, DOCKED, DISENGAGE, DISENGAGED
 } state_t;
 
 typedef struct {

@@ -111,11 +111,18 @@ PLUGIN_API void XPluginDisable(void)
     state=DISABLED;
 }
 
-PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam)
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, void *inParam)
 {
-    if (state!=DISABLED && inParam==0 &&
-        (inMessage==XPLM_MSG_PLANE_LOADED || inMessage==XPLM_MSG_PLANE_CRASHED || inMessage==XPLM_MSG_AIRPORT_LOADED))
+    if (state!=DISABLED && inMessage==XPLM_MSG_AIRPORT_LOADED)
         newplane();
+}
+
+/* Reset new plane state after one frame of drawing */
+static int drawcallback(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
+{
+    if (state == NEWPLANE) state = IDLE;
+    XPLMUnregisterDrawCallback(drawcallback, xplm_Phase_LastScene, 0, NULL);	/* Unregister ourselves */
+    return 1;
 }
 
 static void newplane(void)
@@ -147,12 +154,9 @@ static void newplane(void)
     else
         door_x=door_y=door_z=0;
 
-    if (door_x && (plane_type!=15))
-	/* Have ID and data */
-        return;
-
-    /* Try table */
-    if (XPLMGetDatab(ref_acf_descrip, acf_descrip, 0, 128))
+    if ((!door_x || plane_type==15) &&
+        XPLMGetDatab(ref_acf_descrip, acf_descrip, 0, 128))
+        /* Try table */
         for (i=0; i<sizeof(planedb)/sizeof(db_t); i++)
             if (strstr(acf_descrip, planedb[i].key) && (door_x || planedb[i].lat))
             {
@@ -163,11 +167,20 @@ static void newplane(void)
                     door_y=F2M*planedb[i].vert + XPLMGetDataf(ref_acf_tow_hook_Y);
                     door_z=F2M*planedb[i].lng  + XPLMGetDataf(ref_acf_tow_hook_Z);
                 }
-                return;
+                break;
             }
 	
     if (!door_x)
-        state=IDFAIL;	/* No data */
+    {
+        /* No data */
+        state = IDFAIL;
+    }
+    else
+    {
+        /* Allow one frame of drawing in this newplane state to check for alignment at a gate */
+        state = NEWPLANE;
+        XPLMRegisterDrawCallback(drawcallback, xplm_Phase_LastScene, 0, NULL);	/* After other 3D objects */
+    }
 }
 
 static void resetidle(void)
@@ -185,7 +198,7 @@ static float getgate(XPLMDataRef inRefcon)
     float now, object_x, object_y, object_z, object_h;
     float local_x, local_y, local_z;
 	
-    if (state<IDLE) return 0;
+    if (state <= IDFAIL) return 0;
 
     object_x=XPLMGetDataf(ref_draw_object_x);
     object_y=XPLMGetDataf(ref_draw_object_y);
@@ -220,7 +233,27 @@ static float getgate(XPLMDataRef inRefcon)
     if (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z)
     {
         /* Just come into range */
-        state=TRACK;
+        if (state == NEWPLANE && fabs(local_z) < NEW_Z)
+        {
+            /* Fudge plane's position to line up with this gate */
+            float object_hcos, object_hsin;
+            int running;
+
+            object_hcos=cos(object_h);
+            object_hsin=sin(object_h);
+            XPLMSetDatad(ref_plane_x, XPLMGetDatad(ref_plane_x) + local_z * object_hsin - local_x * object_hcos);
+            XPLMSetDatad(ref_plane_z, XPLMGetDatad(ref_plane_z) - local_z * object_hcos - local_x * object_hsin);
+            localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);	/* recalc */
+
+            XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
+            running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
+            state = running ? TRACK : DOCKED;
+        }
+        else
+        {
+            /* Approaching gate */
+            state = TRACK;
+        }
         gate_x=object_x;
         gate_y=object_y;
         gate_z=object_z;
@@ -237,7 +270,7 @@ static float getdgs(XPLMDataRef inRefcon)
     float now, object_x, object_y, object_z;
     float local_x, local_y, local_z;
 
-    if (state<=IDLE) return 0;
+    if (state <= IDLE) return 0;	/* Only interested in DGSs if we're in range of a gate */
 
     object_x=XPLMGetDataf(ref_draw_object_x);
     object_y=XPLMGetDataf(ref_draw_object_y);
