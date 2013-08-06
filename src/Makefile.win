@@ -12,7 +12,7 @@ DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)\CHeaders\XPLM
 CFLAGS=-nologo -fp:fast -LD $(BUILD) $(DEFINES) $(INC)
 
-SRC=.\autogate.c
+SRC=autogate.c
 TARGETDIR=..\$(PROJECT)
 XPLANE9=X:\Desktop\X-Plane 9
 XPLANE10=X:\Desktop\X-Plane 10
@@ -48,15 +48,15 @@ install:	$(TARGET)
 	$(CP) $(TARGETDIR)\64\win.xpl "$(XPLANE10)\$(INSTALLDIR)\64\"
 !endif
 
-$(TARGETDIR)\win.xpl:
+$(TARGETDIR)\win.xpl:	$(SRC)
 	-@if not exist "$(TARGETDIR)" $(MD) "$(TARGETDIR)"
 	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
-$(TARGETDIR)\32\win.xpl:
+$(TARGETDIR)\32\win.xpl:	$(SRC)
 	-@if not exist "$(TARGETDIR)\32" $(MD) "$(TARGETDIR)\32"
 	$(CC) -arch:SSE2 $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
-$(TARGETDIR)\64\win.xpl:
+$(TARGETDIR)\64\win.xpl:	$(SRC)
 	-@if not exist "$(TARGETDIR)\64" $(MD) "$(TARGETDIR)\64"
 	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
