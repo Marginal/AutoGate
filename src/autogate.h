@@ -38,7 +38,7 @@ const float OBJ_Y=  4;
 const float CAP_X = 10;
 const float CAP_Z = 70;	/* (50-80 in Safedock2 flier) */
 const float GOOD_Z= 0.5;
-const float NEW_Z = 10;	/* Max distance to fudge new Ramp Start */
+const float NEW_Z = 20;	/* Max distance to fudge new Ramp Start */
 
 /* DGS distances [m]     (to door location, not ref point) */
 const float AZI_X = 5;	/* Azimuth guidance */
