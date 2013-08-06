@@ -15,11 +15,12 @@
 #include <math.h>
 #include <assert.h>
 
+#define XPLM200	/* Requires X-Plane 9.0 or later */
 #include "XPLMDataAccess.h"
 #include "XPLMDisplay.h"
 #include "XPLMGraphics.h"
 #include "XPLMPlugin.h"
-
+#include "XPLMUtilities.h"
 
 const char pluginName[]="AutoGate";
 const char pluginSig[] ="Marginal.AutoGate";

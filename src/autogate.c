@@ -15,6 +15,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason, LPVOID lpReserved)
 
 
 /* Globals */
+static int v9;
 static XPLMWindowID windowId = NULL;
 static state_t state = DISABLED;
 static float timestamp;
@@ -45,6 +46,10 @@ static float last_x, last_y, last_z;		/* last object examined */
 static float last_update=0;			/* and the time we examined it */
 static float gate_x, gate_y, gate_z, gate_h;	/* active gate */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
+
+/* In this file */
+static int drawcallbackv9(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon);
+static int drawcallbackv10(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon);
 
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -91,12 +96,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 #ifdef DEBUG
     windowId = XPLMCreateWindow(10, 750, 310, 650, 1, drawdebug, NULL, NULL, NULL);
 #endif
+    v9 = (XPLMFindSymbol("XPLMLoadObjectAsync") == NULL);	/* Are we running under v9? */
+    if (v9) XPLMRegisterDrawCallback(drawcallbackv9, xplm_Phase_LastScene, 0, NULL);	/* Have to just register once in v9 */
+
     return 1;
 }
 
 PLUGIN_API void        XPluginStop(void)
 {
     if (windowId) XPLMDestroyWindow(windowId);
+    if (v9) XPLMUnregisterDrawCallback(drawcallbackv9, xplm_Phase_LastScene, 0, NULL);
 }
 
 PLUGIN_API int XPluginEnable(void)
@@ -117,11 +126,18 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, voi
         newplane();
 }
 
-/* Reset new plane state after one frame of drawing */
-static int drawcallback(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
+/* Reset new plane state after drawing */
+static int drawcallbackv9(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
 {
     if (state == NEWPLANE) state = IDLE;
-    XPLMUnregisterDrawCallback(drawcallback, xplm_Phase_LastScene, 0, NULL);	/* Unregister ourselves */
+    return 1;
+}
+
+/* Reset new plane state after one frame of drawing */
+static int drawcallbackv10(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
+{
+    if (state == NEWPLANE) state = IDLE;
+    XPLMUnregisterDrawCallback(drawcallbackv10, xplm_Phase_LastScene, 0, NULL);	/* Unregister ourselves */
     return 1;
 }
 
@@ -179,7 +195,7 @@ static void newplane(void)
     {
         /* Allow one frame of drawing in this newplane state to check for alignment at a gate */
         state = NEWPLANE;
-        XPLMRegisterDrawCallback(drawcallback, xplm_Phase_LastScene, 0, NULL);	/* After other 3D objects */
+        if (!v9) XPLMRegisterDrawCallback(drawcallbackv10, xplm_Phase_LastScene, 0, NULL);	/* After other 3D objects */
     }
 }
 
