@@ -6,7 +6,7 @@
 XPSDK=..\..\XPSDK212
 
 CC=cl
-#BUILD=-Zi -DDEBUG
+BUILD=-Zi -DDEBUG
 BUILD=-O2 -DNDEBUG
 DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
 INC=-I$(XPSDK)\CHeaders\XPLM
@@ -32,20 +32,27 @@ TARGET=$(TARGETDIR)\32\win.xpl $(TARGETDIR)\win.xpl
 LIBS=$(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib
 
 RM=del /q
-CP=copy /y
+CP=copy /y >nul
 MD=mkdir
 
 all:	$(TARGET)
 
 install:	$(TARGET)
 !if "$(CPU)" == "x86"
-	-$(MD) "$(XPLANE9)\$(INSTALLDIR)\"
+	-@if not exist "$(XPLANE9)\$(INSTALLDIR)" $(MD) "$(XPLANE9)\$(INSTALLDIR)"
 	$(CP) $(TARGETDIR)\win.xpl "$(XPLANE9)\$(INSTALLDIR)\"
-	-$(MD) "$(XPLANE10)\$(INSTALLDIR)\32"
+	-$(CP) $(TARGETDIR)\win.pdb "$(XPLANE9)\$(INSTALLDIR)\"
+	-@if not exist "$(XPLANE10)\$(INSTALLDIR)" $(MD) "$(XPLANE10)\$(INSTALLDIR)"
+	$(CP) $(TARGETDIR)\win.xpl "$(XPLANE10)\$(INSTALLDIR)\"
+	-$(CP) $(TARGETDIR)\win.pdb "$(XPLANE10)\$(INSTALLDIR)\"
+	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\32" $(MD) "$(XPLANE10)\$(INSTALLDIR)\32"
 	$(CP) $(TARGETDIR)\32\win.xpl "$(XPLANE10)\$(INSTALLDIR)\32\"
+	-$(CP) $(TARGETDIR)\32\win.pdb "$(XPLANE10)\$(INSTALLDIR)\32\"
 !else
-	-$(MD) "$(XPLANE10)\$(INSTALLDIR)\64\"
+	-@if not exist "$(XPLANE10)\$(INSTALLDIR)" $(MD) "$(XPLANE10)\$(INSTALLDIR)"
+	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\64" $(MD) "$(XPLANE10)\$(INSTALLDIR)\64"
 	$(CP) $(TARGETDIR)\64\win.xpl "$(XPLANE10)\$(INSTALLDIR)\64\"
+	-$(CP) $(TARGETDIR)\64\win.pdb "$(XPLANE10)\$(INSTALLDIR)\64\"
 !endif
 
 $(TARGETDIR)\win.xpl:	$(SRC)
