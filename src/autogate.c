@@ -15,7 +15,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason, LPVOID lpReserved)
 
 
 /* Globals */
-static int v9;
 static XPLMWindowID windowId = NULL;
 static state_t state = DISABLED;
 static float timestamp;
@@ -48,8 +47,7 @@ static float gate_x, gate_y, gate_z, gate_h;	/* active gate */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
 
 /* In this file */
-static int drawcallbackv9(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon);
-static int drawcallbackv10(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon);
+static float flightcallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon);
 
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -96,8 +94,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 #ifdef DEBUG
     windowId = XPLMCreateWindow(10, 750, 310, 650, 1, drawdebug, NULL, NULL, NULL);
 #endif
-    v9 = (XPLMFindSymbol("XPLMLoadObjectAsync") == NULL);	/* Are we running under v9? */
-    if (v9) XPLMRegisterDrawCallback(drawcallbackv9, xplm_Phase_LastScene, 0, NULL);	/* Have to just register once in v9 */
+    XPLMRegisterFlightLoopCallback(flightcallback, 0, NULL);	/* For checking get alignment on new location */
 
     return 1;
 }
@@ -105,7 +102,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 PLUGIN_API void        XPluginStop(void)
 {
     if (windowId) XPLMDestroyWindow(windowId);
-    if (v9) XPLMUnregisterDrawCallback(drawcallbackv9, xplm_Phase_LastScene, 0, NULL);
+    XPLMUnregisterFlightLoopCallback(flightcallback, NULL);
 }
 
 PLUGIN_API int XPluginEnable(void)
@@ -127,18 +124,10 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, voi
 }
 
 /* Reset new plane state after drawing */
-static int drawcallbackv9(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
+static float flightcallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon)
 {
     if (state == NEWPLANE) state = IDLE;
-    return 1;
-}
-
-/* Reset new plane state after one frame of drawing */
-static int drawcallbackv10(XPLMDrawingPhase inPhase, int inIsBefore, void *inRefcon)
-{
-    if (state == NEWPLANE) state = IDLE;
-    XPLMUnregisterDrawCallback(drawcallbackv10, xplm_Phase_LastScene, 0, NULL);	/* Unregister ourselves */
-    return 1;
+    return 0;	/* Don't call again */
 }
 
 static void newplane(void)
@@ -185,18 +174,9 @@ static void newplane(void)
                 }
                 break;
             }
-	
-    if (!door_x)
-    {
-        /* No data */
-        state = IDFAIL;
-    }
-    else
-    {
-        /* Allow one frame of drawing in this newplane state to check for alignment at a gate */
-        state = NEWPLANE;
-        if (!v9) XPLMRegisterDrawCallback(drawcallbackv10, xplm_Phase_LastScene, 0, NULL);	/* After other 3D objects */
-    }
+
+    /* If have data, check for alignment at a gate during next frame */
+    state = door_x ? NEWPLANE : IDFAIL;
 }
 
 static void resetidle(void)
@@ -243,6 +223,10 @@ static float getgate(XPLMDataRef inRefcon)
         /* Not in range of this gate */
         if (gate_x==object_x && gate_y==object_y && gate_z==object_z)
             resetidle();	/* Just gone out of range of the tracking gate */
+
+        else if (state == NEWPLANE)
+            XPLMSetFlightLoopCallbackInterval(flightcallback, -1, 1, NULL);	/* Reset newplane state before next frame */
+
         return 0;
     }
 	    

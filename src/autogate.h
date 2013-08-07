@@ -20,7 +20,7 @@
 #include "XPLMDisplay.h"
 #include "XPLMGraphics.h"
 #include "XPLMPlugin.h"
-#include "XPLMUtilities.h"
+#include "XPLMProcessing.h"
 
 const char pluginName[]="AutoGate";
 const char pluginSig[] ="Marginal.AutoGate";
