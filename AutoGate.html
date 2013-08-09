@@ -35,7 +35,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 <p>This kit allows X-Plane scenery designers to add animated jetway and docking guidance systems (DGS) to scenery packages. Two types of jetway and two types of DGS are included.</p>
 </p>
 <p>The jetway animates to &ldquo;dock&rdquo; with the plane's main door when the pilot engages the parking brake and shuts down the plane's engines with the plane within &frac12;m of the correct stopping position. The DGS guides the pilot to the correct stopping position.</p>
-<p> An <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package built using this kit is available. Please see the notes <a href="#upgrade">below</a> if you're upgrading from a previous version of this kit.</p>
+<p> An <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package built using this kit is available. Please see the notes <a href="#upgrade">below</a> if you're upgrading from version 1.2 or earlier of this kit.</p>
 
 <h3>How it works</h3>
 <p>The jetways and DGSs are standard X-Plane scenery objects that you place in your scenery package using <a href="http://marginal.org.uk/x-planescenery/tools.html" target="_blank">OverlayEditor</a> <small>(version 2.27 or later recommended)</small> or <a href="http://developer.x-plane.com/tools/worldeditor/" target="_blank">WED</a> <small>(version 1.1r1 or later recommended)</small>. They are animated by X-Plane custom datarefs which are supplied by a plugin.</p>
@@ -119,7 +119,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
     </tr>
   </tbody>
 </table>
-<p>Various versions of these jetway objects are supplied in this kit's <code>Jetways</code> folder, named <code>AutoGate-<i>l</i>m-glass.obj</code> and <code>AutoGate-<i>l</i>m-steel.obj</code>. These differ in the (approximate) length <i><code>l</code></i> of the jetway in its retracted position. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Various versions of these jetway objects are supplied in this kit's <code>Jetways</code> folder, named <code>AutoGate-<i>l</i>m-glass.obj</code>, <code>AutoGate-straight-<i>l</i>m-glass.obj</code>, <code>AutoGate-<i>l</i>m-steel.obj</code>and <code>AutoGate-straight-<i>l</i>m-steel.obj</code>. These differ whether the jetway is angled or straight relative to the aircraft, and in the (approximate) length <i><code>l</code></i> of the jetway in its retracted position. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 
 <p>To place an animated jetway into your scenery package:</p>
 <ul>
@@ -186,7 +186,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <p>Various static objects are supplied in this kit's <code>Jetways</code> folder:</p>
 <dl>
-  <dt><code>StaticGate-<i>l</i>m-glass.obj</code> and <code>StaticGate-<i>l</i>m-steel.obj</code></dt>
+  <dt><code>StaticGate-<i>l</i>m-glass.obj</code>, <code>StaticGate-straight-<i>l</i>m-glass.obj</code>, <code>StaticGate-<i>l</i>m-steel.obj</code> and <code>StaticGate-straight-<i>l</i>m-steel.obj</code></dt>
   <dd>Static versions of the AutoGate jetways. These can be used when a static aircraft is parked at a gate. These can also be used in conjunction with a single AutoGate animated jetway at a gate which has multiple jetways.</dd>
   <dt><code>JetwayExt-<i>l</i>m-glass.obj</code> and <code>JetwayExt-<i>l</i>m-steel.obj</code></dt>
   <dd>Jetway extensions with a supporting pillar at one end.</dd>
@@ -207,11 +207,15 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <p>The supplied DGSs are not designed to be customisable. However the plugin publishes various datarefs that you can use to construct your own DGS. Contact the <a href="mailto:x-plane@marginal.org.uk">author</a> if you would like more information.</p>
 
-<h3><a id="upgrade">Notes for users of previous versions</a></h3>
+<h3><a id="upgrade">Notes for users of version 1.2 and earlier</a></h3>
 
-<p>This kit and the associated AutoGate plugin require X-Plane version 9 or later. If you're designing a scenery package for X-Plane 8 then you should stick with a previous version of this kit and of the AutoGate plugin.</p>
+<p>This obkit and the associated AutoGate plugin require X-Plane version 9 or later. If you're designing a scenery package for X-Plane 8 then you should stick with a previous version of this kit and of the AutoGate plugin.</p>
 <p>The DGS objects in the <code>DGSs</code> and <code>Standalone_DGSs</code> folders are drop-in replacements for older objects of the same name, and use higher quality pre-compressed DDS textures. Use OverlayEditor's <samp>Import</samp> button, or use Finder or Explorer to replace your existing DGS objects and textures. Delete the old PNG textures <code>Safedock2S.png</code>, <code>Safedock2S_LIT.png</code>, <code>Safegate.png</code> and <code>Safegate_LIT.png</code> from your scenery package folder.</p>
-<p>There are no direct replacement for the old <code>AutoGate.obj</code> and <code>AutoGate-angled.obj</code> objects, but <code>AutoGate-20m-steel.obj</code> plus <code>JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate-angled.obj</code>.</p>
+<p>There are no direct replacement for the old <code>AutoGate.obj</code> and <code>AutoGate-angled.obj</code> objects, but:</p>
+<ul>
+  <li><code>AutoGate-straight-20m-steel.obj</code> plus <code>JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate.obj</code>.</li>
+  <li><code>AutoGate-20m-steel.obj</code> plus <code>JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate-angled.obj</code>.</li>
+</ul>
 <p>You can mix old and new objects in your scenery package. <small>(Note that the spacing rules described above still apply irrespective of whether objects are old or new)</small>.</p>
 
 <h3>Acknowledgements</h3>
