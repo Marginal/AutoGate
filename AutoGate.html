@@ -77,7 +77,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> and/or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>Standalone_DGSs</code> folder into your scenery package folder.</li>
     </ul>
   </li>
-  <li>Place the DGS objects in your scenery package just like any other 3D object. The DGSs should be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
+  <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>An aircraft will be at the stopping position when the boarding door is level with the DGS object's &ldquo;origin&rdquo; (so if your scenery includes static jetways, place the DGS so that the origin is roughly level with the jetway door). To visualise the DGS object's origin:
     <table>
       <tbody>
@@ -129,7 +129,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       <li>WED: Use Finder or Explorer to copy the jetway object(s) plus the associated textures <code>AutoGate2.dds</code> + <code>AutoGate2_LIT.dds</code> from the <code>Jetways</code> folder into your scenery package folder.</li>
     </ul>
   </li>
-  <li>Place the jetway objects in your scenery package just like any other 3D object. The jetways should be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
+  <li>Place the jetway objects in your scenery package just like any other 3D object. For correct operation the jetways <b>must</b> be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>An aircraft will be at the stopping position when the boarding door is level with the jetway object's &ldquo;origin&rdquo;. To visualise the jetway object's origin:
     <table>
       <tbody>
@@ -148,7 +148,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       </table>
   </li>
   <li>The pilot will find it difficult to line-up at the gate without a lead-in apron line so you may wish to add one and connect it to the taxi network. The lead-in line should pass through the jetway object's origin. (According to ICAO Annex 14 gate lead-in lines should, like taxi lines, be solid yellow).</li>
-  <li>Place only one animated jetway at each gate. If you are modelling a complicated gate with multiple jetways the additional jetways must be static; use the <code>StaticGate-*.obj</code> jetway objects from the <code>Jetways</code> folder. <small>(This limitation exists in part because the X-Plane ACF file only specifies one boarding door location)</small>. The <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package contains a gate of this configuration.
+  <li>Place only one animated jetway at each gate. If you are modelling a complicated gate with multiple jetways the additional jetways must be static; use the <code>StaticGate-*.obj</code> jetway objects described <a href="#static">below</a>. <small>(This limitation exists in part because the X-Plane ACF file only specifies one boarding door location)</small>. The <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package contains a gate of this configuration.
   <li>If you want to designate the gate as a Ramp Start then mark it as type &ldquo;Gate&rdquo; and set its location at the stopping position / jetway object origin.<br>
 <small>Note: X-Plane v9 doesn't support Ramp Start types, and places aircraft with their center of gravity at the Ramp Start location; so if designing for v9 set this location well back from the stopping position / jetway object origin.</small></li>
   <li>Place the animated jetway objects with their origins more than 20m away from any other AutoGate animated jetways and from any <u>stand-alone</u> DGSs.</li>
@@ -165,7 +165,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> and/or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>DGSs</code> folder into your scenery package folder.</li>
     </ul>
   </li>
-  <li>Place the DGS objects in your scenery package just like any other 3D object. The DGSs should be placed with the same heading as the jetways, which is the same heading that the aircraft will have when it is stopped at the stand.</li>
+  <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading as the jetways, which is the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>The DGS objects must be placed within this zone relative to the jetway object's origin:
     <table>
       <tbody>
@@ -182,7 +182,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
   <li>The DGS will remain blank or will display incorrect information if it is not placed next to an AutoGate jetway.</li>
 </ul>
 
-<h4>Static Objects</h4>
+<h4><a id="static">Static Objects</a></h4>
 
 <p>Various static objects are supplied in this kit's <code>Jetways</code> folder:</p>
 <dl>
