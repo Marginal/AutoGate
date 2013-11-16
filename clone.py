@@ -51,7 +51,7 @@ refdist=20
 
 for obj in ['SA-%sm-Safedock2S-%sm.obj',
             'SA-%sm-Safegate-%sm.obj']:
-    for dist in [16, 18, 20, 22, 24]:
+    for dist in [16, 18, 20, 22, 24, 26, 28, 30]:
         for height in [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8]:
             if height==refheight and dist==refdist: continue
             infilename=("Standalone_DGSs/"+obj) % (refdist, refheight)
