@@ -31,12 +31,12 @@ static XPLMDataRef ref_acf_door_x, ref_acf_door_y, ref_acf_door_z;
 static XPLMDataRef ref_total_running_time_sec;
 
 /* Published DataRefs */
-static XPLMDataRef ref_vert, ref_lat;
+static XPLMDataRef ref_vert, ref_lat, ref_moving;
 static XPLMDataRef ref_status, ref_id1, ref_id2, ref_id3, ref_id4, ref_lr, ref_track;
 static XPLMDataRef ref_azimuth, ref_distance, ref_distance2;
 
 /* Published DataRef values */
-static float lat, vert;
+static float lat, vert, moving;
 static float status, id1, id2, id3, id4, lr, track;
 static float azimuth, distance, distance2;
 
@@ -79,6 +79,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     /* Published Datarefs */
     ref_vert     =floatref("marginal.org.uk/autogate/vert", getgate, &vert);
     ref_lat      =floatref("marginal.org.uk/autogate/lat",  getgate, &lat);
+    ref_moving   =floatref("marginal.org.uk/autogate/moving", getgate, &moving);
 
     ref_status   =floatref("marginal.org.uk/dgs/status",    getdgs, &status);
     ref_id1      =floatref("marginal.org.uk/dgs/id1",       getdgs, &id1);
@@ -99,7 +100,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     return 1;
 }
 
-PLUGIN_API void        XPluginStop(void)
+PLUGIN_API void XPluginStop(void)
 {
     if (windowId) XPLMDestroyWindow(windowId);
     XPLMUnregisterFlightLoopCallback(flightcallback, NULL);
@@ -184,7 +185,7 @@ static void resetidle(void)
     state=IDLE;
     gate_x=gate_y=gate_z=gate_h=0;
     dgs_x=dgs_y=dgs_z=0;
-    vert=lat=0;
+    vert=lat=moving=0;
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
 }
@@ -455,6 +456,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             status=3;	/* OK */
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
+            moving=1;
         }
         else
             status=2;	/* Stop */
@@ -471,6 +473,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
         {
             lat =door_x-OBJ_X;
             vert=local_y-OBJ_Y;
+            moving=0;
         }
         break;
 
@@ -479,13 +482,14 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
         if (now>timestamp+DURATION)
         {
             state=DISENGAGED;
-            lat=vert=0;
+            lat=vert=moving=0;
         }
         else
         {
             float ratio=1 - (now-timestamp)/DURATION;
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
+            moving=1;
         }
         break;
 
