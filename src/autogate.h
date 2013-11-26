@@ -50,7 +50,7 @@ const float DGS_X = 10;
 const float DGS_Z =-30;	/* (6-50 in Safedock2 flier) */
 
 const float WAITTIME=1;	/* Time to wait before engaging */
-const float DURATION=5;	/* Time to engage/disengage */
+const float DURATION=15;	/* Time to engage/disengage */
 
 
 /* prototypes */
