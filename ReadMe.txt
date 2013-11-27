@@ -4,7 +4,7 @@ AutoGate plugin
 
 Requirements
 ------------
-* X-Plane 9.00 or later
+* X-Plane 9.70 or 10.10 and later
 * Windows XP or later, Mac OS 10.5 or later, Linux
 * Scenery package with AutoGate Docking Guidance Systems (DGSs)
 
@@ -38,3 +38,4 @@ Compatible Planes
 Version 1.46
 Copyright Jonathan Harris 2006-2013
 http://marginal.org.uk/x-planescenery/
+Licensed under the GNU Library General Public License v2.1.

@@ -1,8 +1,9 @@
 /*
  * AutoGate
  * 
- * (c) Jonathan Harris 2006,2008,2012
+ * (c) Jonathan Harris 2006-2013
  * 
+ * Licensed under GNU LGPL v2.1.
  */
 
 #ifdef _MSC_VER
