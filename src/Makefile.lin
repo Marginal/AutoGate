@@ -1,5 +1,5 @@
 # -*-Makefile-*-
-# Setup for building on Ubuntu x86_64 with multilib support
+# Setup for building on Ubuntu x86_64 with multilib support. Requires libopenal-dev:i386
 
 include ../version.mak
 
@@ -15,7 +15,7 @@ INC=-I$(XPSDK)/CHeaders/XPLM -I$(XPSDK)/CHeaders/Widgets
 CFLAGS=-march=core2 -ffast-math -pipe -Wall -Wdouble-promotion -Winline -Wno-missing-braces -static-libgcc -shared -fPIC -fvisibility=hidden $(BUILD) $(DEFINES) $(INC)
 
 VPATH=
-SRC=autogate.c
+SRC=autogate.c sound.c
 LIBS=
 TARGETDIR=../$(PROJECT)
 XPLANE9=~/Desktop/X-Plane\ 9
@@ -46,10 +46,11 @@ install:	$(TARGET_32) $(TARGET_64) | $(XPLANE9)/$(INSTALLDIR) $(XPLANE10)/$(INST
 	$(CP) $(TARGET_64) $(XPLANE10)/$(INSTALLDIR)/64
 
 $(TARGET_32):	$(OBJS_32) | $(TARGETDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -m32 $(LIBS) -o $@ $+
+	$(CC) $(CFLAGS) $(LDFLAGS) -m32 -o $@ $+ $(LIBS) -lopenal
 
+# 64bit builds should have OpenAL already loaded by X-Plane
 $(TARGET_64):	$(OBJS_64) | $(TARGETDIR)/64
-	$(CC) $(CFLAGS) $(LDFLAGS) -m64 $(LIBS) -o $@ $+
+	$(CC) $(CFLAGS) $(LDFLAGS) -m64 -o $@ $+ $(LIBS)
 
 $(OBJS_32): | $(BUILD_32)
 

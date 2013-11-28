@@ -16,6 +16,10 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason, LPVOID lpReserved)
 
 
 /* Globals */
+static const char pluginName[]="AutoGate";
+static const char pluginSig[] ="Marginal.AutoGate";
+static const char pluginDesc[]="Manages boarding bridges and DGSs";
+
 static XPLMWindowID windowId = NULL;
 static state_t state = DISABLED;
 static float timestamp;
@@ -37,18 +41,98 @@ static XPLMDataRef ref_status, ref_id1, ref_id2, ref_id3, ref_id4, ref_lr, ref_t
 static XPLMDataRef ref_azimuth, ref_distance, ref_distance2;
 
 /* Published DataRef values */
-static float lat, vert, moving;
+float lat, vert, moving;
 static float status, id1, id2, id3, id4, lr, track;
 static float azimuth, distance, distance2;
 
 /* Internal state */
 static float last_x, last_y, last_z;		/* last object examined */
 static float last_update=0;			/* and the time we examined it */
-static float gate_x, gate_y, gate_z, gate_h;	/* active gate */
+float gate_x, gate_y, gate_z, gate_h;		/* active gate */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
 
+
 /* In this file */
-static float flightcallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon);
+static float newplanecallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon);
+static void newplane(void);
+static void resetidle(void);
+
+static XPLMDataRef floatref(char*, XPLMGetDataf_f, float*);
+static float getgate(XPLMDataRef);
+static float getdgs(XPLMDataRef);
+
+static void localpos(float, float, float, float, float *, float *, float *);
+static void updaterefs(float, float, float, float);
+
+#ifdef DEBUG
+static void drawdebug(XPLMWindowID, void *);
+#endif
+
+/* Known planes */
+static const db_t planedb[]={/* lng   lat  vert  type */
+    {"A300",	21.0, -8.0, -1.0,  0},
+    {"A310",	18.0, -8.0, -1.0,  1},
+    {"A318",	16.7, -6.0, -1.5,  2},
+    {"A319",	21.7, -6.0, -1.5,  2},	/* xpfw */
+    {"A320-200",16.7, -6.0, -1.5,  2},	/* xpfw */
+    {"A320",	18.3, -6.0, -1.4,  2},
+    {"A321-200", 2.5, -6.0, -1.5,  2},	/* xpfw */
+    {"A321",	17.5, -6.0, -1.4,  2},
+    {"A330",	   0,    0,    0,  3},
+    {"A340",	19.6, -8.0, -1.2,  4},
+    {"A350",	   0,    0,    0,  5},
+    {"A380",	23.0, -9.7, -6.0,  6}, /* first door */
+    //	{"A380",	56.5, -11,  -6.0,  6}, /* second door */
+    {"717",	   0,    0,    0,  7},
+    {"737-700",	15.0, -6.0, -1.2,  8},
+    {"737 800",	16.8, -5.2, -1.5,  8},	/* xpfw b26*/
+    {"737-800",	17.4, -6.0, -1.4,  8},
+    {"738", 	17.4, -6.0, -1.4,  8},
+    {"737", 	17.4, -6.0, -1.4,  8},
+    {"747 400", 30.9, -9.6, -2.2,  9},	/* xpfw */
+    {"747", 	31.8, -9.4, -3.8,  9},	/* XP840b6 first door */
+    {"757",	   0,    0,    0, 10},
+    {"767", 	18.2, -7.5, -1.5, 11},
+    {"777 200",	39.8, -9.0, -1.4, 12},	/* xpfw 777-200 ER & LR - note nose is at 18.39 */
+    {"777", 	21.7, -9.0, -2.4, 12},
+    {"787",	   0,    0,    0, 13},
+    {"RJ70",	 6.6, -5.3, -3.0, 14},
+    {"RJ 70",	 6.6, -5.3, -3.0, 14},
+    {"RJ85",	 5.3, -5.7, -2.0, 14},
+    {"RJ 85",	 5.3, -5.7, -2.0, 14},
+    {"RJ100",	 0.9, -5.7, -2.0, 14},
+    {"RJ 100",	 0.9, -5.7, -2.0, 14},
+    {"md-11",	15.9, -7.6, -1.6, 15},
+    {"MD11",	17.0, -7.7, -1.4, 15},
+};
+
+/* Known planes */
+static const icao_t icaodb[]={
+    {"A30",  0},
+    {"A3ST", 0},
+    {"A318", 2},
+    {"A319", 2},
+    {"A32",  2},
+    {"A310", 1},	/* Note after A318/A319 */
+    {"A33",  3},
+    {"A34",  4},
+    {"A35",  5},
+    {"A38",  6},
+    {"B71",  7},
+    {"MD8",  7},
+    {"MD9",  7},
+    {"B73",  8},
+    {"E737", 8},
+    {"B74",  9},
+    {"BSCA", 9},
+    {"B75",  10},
+    {"B76",  11},
+    {"E767", 11},
+    {"B77",  12},
+    {"B78",  13},
+    {"RJ",   14},
+    {"B46",  14},
+};
 
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -76,6 +160,9 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     ref_acf_door_y     =XPLMFindDataRef("sim/aircraft/view/acf_door_y");
     ref_acf_door_z     =XPLMFindDataRef("sim/aircraft/view/acf_door_z");
     ref_total_running_time_sec=XPLMFindDataRef("sim/time/total_running_time_sec");
+    ref_audio          =XPLMFindDataRef("sim/operation/sound/sound_on");
+    ref_paused         =XPLMFindDataRef("sim/time/paused");
+    ref_view_external  =XPLMFindDataRef("sim/graphics/view/view_is_external");
 
     /* Published Datarefs */
     ref_vert     =floatref("marginal.org.uk/autogate/vert", getgate, &vert);
@@ -96,7 +183,10 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 #ifdef DEBUG
     windowId = XPLMCreateWindow(10, 750, 310, 650, 1, drawdebug, NULL, NULL, NULL);
 #endif
-    XPLMRegisterFlightLoopCallback(flightcallback, 0, NULL);	/* For checking get alignment on new location */
+    XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
+    XPLMRegisterFlightLoopCallback(initsoundcallback, -1, NULL);	/* Deferred initialisation */
+    XPLMRegisterFlightLoopCallback(alertcallback, 0, NULL);
+    XPLMRegisterFlightLoopCallback(newplanecallback, 0, NULL);		/* For checking gate alignment on new location */
 
     return 1;
 }
@@ -104,7 +194,10 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 PLUGIN_API void XPluginStop(void)
 {
     if (windowId) XPLMDestroyWindow(windowId);
-    XPLMUnregisterFlightLoopCallback(flightcallback, NULL);
+    XPLMUnregisterFlightLoopCallback(newplanecallback, NULL);
+    XPLMUnregisterFlightLoopCallback(alertcallback, NULL);
+    XPLMUnregisterFlightLoopCallback(initsoundcallback, NULL);
+    closesound();
 }
 
 PLUGIN_API int XPluginEnable(void)
@@ -126,7 +219,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, voi
 }
 
 /* Reset new plane state after drawing */
-static float flightcallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon)
+static float newplanecallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon)
 {
     if (state == NEWPLANE) state = IDLE;
     return 0;	/* Don't call again */
@@ -189,6 +282,7 @@ static void resetidle(void)
     vert=lat=moving=0;
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
+    stopalert();
 }
 
 static float getgate(XPLMDataRef inRefcon)
@@ -227,7 +321,7 @@ static float getgate(XPLMDataRef inRefcon)
             resetidle();	/* Just gone out of range of the tracking gate */
 
         else if (state == NEWPLANE)
-            XPLMSetFlightLoopCallbackInterval(flightcallback, -1, 1, NULL);	/* Reset newplane state before next frame */
+            XPLMSetFlightLoopCallbackInterval(newplanecallback, -1, 1, NULL);	/* Reset newplane state before next frame */
 
         return 0;
     }
@@ -457,6 +551,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             status=3;	/* OK */
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
+            if (!moving) playalert();
             moving=1;
         }
         else
@@ -475,6 +570,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             lat =door_x-OBJ_X;
             vert=local_y-OBJ_Y;
             moving=0;
+            stopalert();
         }
         break;
 
@@ -484,12 +580,14 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
         {
             state=DISENGAGED;
             lat=vert=moving=0;
+            stopalert();
         }
         else
         {
             float ratio=1 - (now-timestamp)/DURATION;
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
+            if (!moving) playalert();
             moving=1;
         }
         break;
@@ -513,12 +611,23 @@ static XPLMDataRef floatref(char *inDataName, XPLMGetDataf_f inReadFloat, float 
 }
 	
 
+/* Log to Log.txt. Returns 0 because that's a failure return code from most XP entry points */
+int xplog(char *msg)
+{
+    XPLMDebugString("AutoGate: ");
+    XPLMDebugString(msg);
+    XPLMDebugString("\n");
+    return 0;
+}
+
+
 #ifdef DEBUG
 static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
 {
     char buf[128];
     int left, top, right, bottom;
     float color[] = { 1.0, 1.0, 1.0 };	/* RGB White */
+    float pos[3], gain;
     int running;
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
     running |= (XPLMGetDataf(ref_parkingbrake) < 0.5);
@@ -544,5 +653,9 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
             lr, track,
             azimuth, distance, distance2);
     XPLMDrawString(color, left + 5, top - 80, buf, 0, xplmFont_Basic);
+    alGetSourcefv(snd_src, AL_POSITION, pos);
+    alGetSourcefv(snd_src, AL_GAIN, &gain);
+    sprintf(buf, "Sound: %10.3f %10.3f %10.3f %6.2f", pos[0], pos[1], pos[2], gain);
+    XPLMDrawString(color, left + 5, top - 90, buf, 0, xplmFont_Basic);
 }				    
 #endif

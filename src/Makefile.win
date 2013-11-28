@@ -4,15 +4,16 @@
 !include ..\version.mak
 
 XPSDK=..\..\XPSDK212
+OPENAL=..\..\openal-soft-1.15.1-bin
 
 CC=cl
 BUILD=-Zi -DDEBUG
 BUILD=-O2 -DNDEBUG
 DEFINES=-DIBM=1 -DAPL=0 -DLIN=0 -DVERSION=$(VERSION)
-INC=-I$(XPSDK)\CHeaders\XPLM
+INC=-I$(XPSDK)\CHeaders\XPLM -I$(OPENAL)\include
 CFLAGS=-nologo -fp:fast -LD $(BUILD) $(DEFINES) $(INC)
 
-SRC=autogate.c
+SRC=autogate.c sound.c
 TARGETDIR=..\$(PROJECT)
 XPLANE9=X:\Desktop\X-Plane 9
 XPLANE10=X:\Desktop\X-Plane 10
@@ -20,16 +21,17 @@ INSTALLDIR=Resources\plugins\$(PROJECT)
 
 # Work out which target we're set up for by looking for a program (ml64.exe) that only exists in the path for one target
 !if [ml64 >nul 2>&1] == 0
-CPU=x64
+ARCH=64
 ARCHXP=_64
 TARGET=$(TARGETDIR)\64\win.xpl
 !else
-CPU=x86
+ARCH=32
 ARCHXP=
 TARGET=$(TARGETDIR)\32\win.xpl $(TARGETDIR)\win.xpl
 !endif
 
-LIBS=$(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib
+# Need OPT:NOREF otherwise MSVC2008 linker discards OpenAL symbols which causes crash!
+LIBS=/link /OPT:NOREF $(XPSDK)\Libraries\Win\XPLM$(ARCHXP).lib $(OPENAL)\lib\Win$(ARCH)\libOpenAL32.dll.a
 
 RM=del /q
 CP=copy /y >nul
@@ -38,26 +40,23 @@ MD=mkdir
 all:	$(TARGET)
 
 install:	$(TARGET)
-!if "$(CPU)" == "x86"
+!if "$(ARCH)" == "32"
 	-@if not exist "$(XPLANE9)\$(INSTALLDIR)" $(MD) "$(XPLANE9)\$(INSTALLDIR)"
 	$(CP) $(TARGETDIR)\win.xpl "$(XPLANE9)\$(INSTALLDIR)\"
 	-$(CP) $(TARGETDIR)\win.pdb "$(XPLANE9)\$(INSTALLDIR)\"
 	-@if not exist "$(XPLANE10)\$(INSTALLDIR)" $(MD) "$(XPLANE10)\$(INSTALLDIR)"
 	$(CP) $(TARGETDIR)\win.xpl "$(XPLANE10)\$(INSTALLDIR)\"
 	-$(CP) $(TARGETDIR)\win.pdb "$(XPLANE10)\$(INSTALLDIR)\"
-	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\32" $(MD) "$(XPLANE10)\$(INSTALLDIR)\32"
-	$(CP) $(TARGETDIR)\32\win.xpl "$(XPLANE10)\$(INSTALLDIR)\32\"
-	-$(CP) $(TARGETDIR)\32\win.pdb "$(XPLANE10)\$(INSTALLDIR)\32\"
 !else
 	-@if not exist "$(XPLANE10)\$(INSTALLDIR)" $(MD) "$(XPLANE10)\$(INSTALLDIR)"
-	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\64" $(MD) "$(XPLANE10)\$(INSTALLDIR)\64"
-	$(CP) $(TARGETDIR)\64\win.xpl "$(XPLANE10)\$(INSTALLDIR)\64\"
-	-$(CP) $(TARGETDIR)\64\win.pdb "$(XPLANE10)\$(INSTALLDIR)\64\"
 !endif
+	-@if not exist "$(XPLANE10)\$(INSTALLDIR)\$(ARCH)" $(MD) "$(XPLANE10)\$(INSTALLDIR)\$(ARCH)"
+	$(CP) $(TARGETDIR)\$(ARCH)\win.xpl "$(XPLANE10)\$(INSTALLDIR)\$(ARCH)\"
+	-$(CP) $(TARGETDIR)\$(ARCH)\win.pdb "$(XPLANE10)\$(INSTALLDIR)\$(ARCH)\"
 
 $(TARGETDIR)\win.xpl:	$(SRC)
 	-@if not exist "$(TARGETDIR)" $(MD) "$(TARGETDIR)"
-	$(CC) $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
+	$(CC) -DMAKECONTEXT $(CFLAGS) -Fe$@ -Fd$* $(SRC) $(LIBS)
 
 $(TARGETDIR)\32\win.xpl:	$(SRC)
 	-@if not exist "$(TARGETDIR)\32" $(MD) "$(TARGETDIR)\32"
@@ -74,3 +73,4 @@ clean:
 	-$(RM) $(TARGETDIR)\64\win.*
 
 autogate.c:	autogate.h
+sound.c:	autogate.h
