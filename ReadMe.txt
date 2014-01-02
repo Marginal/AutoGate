@@ -35,7 +35,7 @@ Compatible Planes
   correct "ICAO code" has been entered on the Standard->Viewpoint screen.
 
 
-Version 1.46
+Version 1.50
 Copyright Jonathan Harris 2006-2013
 http://marginal.org.uk/x-planescenery/
 Licensed under the GNU Library General Public License v2.1.
