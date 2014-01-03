@@ -45,7 +45,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 <h3>Usage</h3>
 
 <p>Download and install the AutoGate <a href="http://marginal.org.uk/x-planescenery/AutoGate.zip">plugin</a>. Installation instructions are in the file <code>ReadMe.txt</code> included.</p>
-<p>Please do not re-distribute the plugin with your scenery package; ask your users to download it from <a href="http://marginal.org.uk/x-planescenery/AutoGate.zip">http://marginal.org.uk/x-planescenery/AutoGate.zip</a> instead. This ensures that they have the latest version. <small>(Future versions of the plugin may support more jetways and/or DGSs, but will will remain backwards-compatible)</small>.</p>
+<p>Please do not re-distribute the plugin with your scenery package; ask your users to download it from <a href="http://marginal.org.uk/x-planescenery/AutoGate.zip">http://marginal.org.uk/x-planescenery/AutoGate.zip</a> instead. This ensures that they have the latest version. <small>(Future versions of the plugin may support more jetways and/or DGSs, but will remain backwards-compatible)</small>.</p>
 
 <h4><a id="standalone">Stand-alone Docking Guidance Systems</a></h4>
 
@@ -96,7 +96,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       </table>
   </li>
   <li>The pilot will find it difficult to line-up at the stand without a lead-in apron line so you may wish to add one and connect it to the taxi network. The lead-in line should pass through the DGS object's origin. (According to ICAO Annex 14 stand lead-in lines should, like taxi lines, be solid yellow).</li>
-  <li>If you want to designate the stand as a Ramp Start then set this location well back from the stopping position / DGS origin; X-Plane places aircraft with their center of gravity at a miscellaneous Ramp Start location.</li>
+  <li>If you want to designate this stand as an X-Plane &ldquo;Ramp Start&rdquo; then place the Ramp Start well back from the stopping position / DGS origin and set its type to &ldquo;Misc&rdquo;; X-Plane places aircraft with their center of gravity at a miscellaneous Ramp Start location.</li>
   <li>Place the DGS objects with their origins more than 20m away from any other stand-alone DGSs and from any AutoGate animated jetways.</li>
 </ul>
 
@@ -149,8 +149,8 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
   </li>
   <li>The pilot will find it difficult to line-up at the gate without a lead-in apron line so you may wish to add one and connect it to the taxi network. The lead-in line should pass through the jetway object's origin. (According to ICAO Annex 14 gate lead-in lines should, like taxi lines, be solid yellow).</li>
   <li>Place only one animated jetway at each gate. If you are modelling a complicated gate with multiple jetways the additional jetways must be static; use the <code>StaticGate-*.obj</code> jetway objects described <a href="#static">below</a>. <small>(This limitation exists in part because the X-Plane ACF file only specifies one boarding door location)</small>. The <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package contains a gate of this configuration.
-  <li>If you want to designate the gate as a Ramp Start then mark it as type &ldquo;Gate&rdquo; and set its location at the stopping position / jetway object origin.<br>
-<small>Note: X-Plane v9 doesn't support Ramp Start types, and places aircraft with their center of gravity at the Ramp Start location; so if designing for v9 set this location well back from the stopping position / jetway object origin.</small></li>
+  <li>If you want to designate this gate as a &ldquo;Ramp Start&rdquo; then place the Ramp Start at the stopping position / jetway object origin and change its type to &ldquo;Gate&rdquo;.<br>
+<small>Note: X-Plane v9 doesn't support Ramp Start types, and places aircraft with their center of gravity at the Ramp Start location; so if designing for v9 place the Ramp Start well back from the stopping position / jetway object origin.</small></li>
   <li>Place the animated jetway objects with their origins more than 20m away from any other AutoGate animated jetways and from any <u>stand-alone</u> DGSs.</li>
 </ul>
 
