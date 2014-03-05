@@ -4,7 +4,7 @@ PLUGIN=$(PROJECT)_$(VER).zip
 PLUGIN_FILES=ReadMe.txt Pilot\ Instructions,\ Type\ 2S\ display.pdf $(PROJECT)/alert.wav $(PROJECT)/lin.xpl $(PROJECT)/mac.xpl $(PROJECT)/win.xpl $(PROJECT)/OpenAL32.dll $(PROJECT)/32/win.xpl $(PROJECT)/64/lin.xpl $(PROJECT)/64/win.xpl
 
 PACKAGE=$(PROJECT)_kit_$(VER).zip
-PACKAGE_FILES=AutoGate.html imgs/*.jpeg Jetways/*.dds Jetways/*.png Jetways/*.obj DGSs/*.dds DGSs/*.obj Standalone_DGSs/*.dds Standalone_DGSs/*.obj
+PACKAGE_FILES=AutoGate.html imgs/*.jpeg Helpers/*.dds Helpers/*.png Helpers/*.obj Jetways-Glass/*.dds Jetways-Glass/*.obj Jetways-Steel/*.dds Jetways-Steel/*.obj DGSs-Safedock2S/*.dds DGSs-Safedock2S/*.obj DGSs-Safegate/*.dds DGSs-Safegate/*.obj Standalone-Safedock2S/*.dds Standalone-Safedock2S/*.obj Standalone-Safegate/*.dds Standalone-Safegate/*.obj
 
 INSTALLDIR=~/Desktop/X-Plane\ 10/Resources/plugins
 
@@ -25,5 +25,6 @@ $(PLUGIN):	$(PLUGIN_FILES)
 
 $(PACKAGE):	$(PACKAGE_FILES)
 	./clone.py
+	touch $(PACKAGE_FILES)
 	rm -f $(PACKAGE)
 	zip -MM $(PACKAGE) $(PACKAGE_FILES)

@@ -38,7 +38,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 <p> An <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package built using this kit is available. Please see the notes <a href="#upgrade">below</a> if you're upgrading from an earlier of this kit.</p>
 
 <h3>How it works</h3>
-<p>The jetways and DGSs are standard X-Plane scenery objects that you place in your scenery package using <a href="http://marginal.org.uk/x-planescenery/tools.html" target="_blank">OverlayEditor</a> <small>(version 2.27 or later recommended)</small> or <a href="http://developer.x-plane.com/tools/worldeditor/" target="_blank">WED</a> <small>(version 1.1r1 or later recommended)</small>. They are animated by X-Plane custom datarefs which are supplied by a plugin.</p>
+<p>The jetways and DGSs are standard X-Plane scenery objects that you place in your scenery package using <a href="http://marginal.org.uk/x-planescenery/tools.html#overlayeditor" target="_blank">OverlayEditor</a> <small>(version 2.48 or later recommended)</small> or <a href="http://developer.x-plane.com/tools/worldeditor/" target="_blank">WED</a> <small>(version 1.1r1 or later recommended)</small>. They are animated by X-Plane custom datarefs which are supplied by a plugin.</p>
 <p>The plugin needs to know the location of the main boarding door on the plane that the user is piloting and, if the plane is an Airbus or Boeing, the type of the plane. The plugin reads this information from the &ldquo;boarding door location&rdquo; and &ldquo;ICAO code&rdquo; values in the ACF file of the aircraft that the user is piloting. These values can be edited on the Standard&nbsp;&rarr; Viewpoint screen in Plane-Maker. If the plugin is not installed or if the plugin cannot determine the location of the main boarding door then the DGS will stay blank and the jetway will remain in the retracted position.</p>
 <p>The system is designed so that it imposes no more load on X-Plane than normal &ldquo;static&rdquo; scenery objects unless the user's viewpoint is within 1000m of a jetway or 500m of a DGS, in which case the load remains very modest.</p>
 
@@ -66,17 +66,17 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
     </tr>
   </tbody>
 </table>
-<p>Various versions of these stand-alone DGS objects are supplied in this kit's <code>Standalone_DGSs</code> folder, named <code>SA-<i>d</i>m-Safedock2S-<i>h</i>m.obj</code> and <code>SA-<i>d</i>m-Safegate-<i>h</i>m.obj</code>. These differ in the distance <code><i>d</i></code> between the stopping point and the DGS, and in the height <code><i>h</i></code> of the DGS above the ground. Parking stands intended for heavies will need the further and taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Various versions of these stand-alone DGS objects are supplied in this kit's <code>Standalone_Safedock2S</code> and <code>Standalone_Safegate</code> folders, named <code>SA-<i>d</i>m-Safedock2S-<i>h</i>m.obj</code> and <code>SA-<i>d</i>m-Safegate-<i>h</i>m.obj</code>. These objects differ in the distance <code><i>d</i></code> between the stopping point and the DGS, and in the height <code><i>h</i></code> of the DGS above the ground. Parking stands intended for heavies will need the further and taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 </p>
 
 <p>To place a stand-alone DGS into your scenery package:</p>
 <ul>
-  <li>First, copy one or more of the DGS objects from the <code>Standalone_DGSs</code> folder into your scenery package;
+  <li>First, copy one or more of the DGS objects from the <code>Standalone_Safedock2S</code> and/or <code>Standalone_Safegate</code> folders into your scenery package:
     <ul>
-      <li>OverlayEditor: Use the <samp>Import</samp> button and navigate to the <code>Standalone_DGSs</code> folder.</li>
-      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> and/or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>Standalone_DGSs</code> folder into your scenery package folder.</li>
+      <li>OverlayEditor: Drag the object(s) from the <code>Standalone_Safedock2S</code> or <code>Standalone_Safegate</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
+      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>Standalone_Safedock2S</code> or <code>Standalone_Safegate</code> folder into your scenery package folder.</li>
     </ul>
-    Alternatively, just copy the whole <code>Standalone_DGSs</code> folder into your scenery package (but don't forget to strip out unused objects before distributing).</li>
+    Alternatively, just copy the <code>Standalone_Safedock2S</code> and/or <code>Standalone_Safegate</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
   <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>An aircraft will be at the stopping position when the boarding door is level with the DGS object's &ldquo;origin&rdquo; (so if your scenery includes static jetways, place the DGS so that the origin is roughly level with the jetway door). To visualise the DGS object's origin:
     <table>
@@ -119,16 +119,16 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
     </tr>
   </tbody>
 </table>
-<p>Various versions of these jetway objects are supplied in this kit's <code>Jetways</code> folder, named <code>AutoGate-<i>l</i>m-glass.obj</code>, <code>AutoGate-perpendicular-<i>l</i>m-glass.obj</code>, <code>AutoGate-straight-<i>l</i>m-glass.obj</code>, <code>AutoGate-<i>l</i>m-steel.obj</code>, <code>AutoGate-perpendicular-<i>l</i>m-steel.obj</code> and <code>AutoGate-straight-<i>l</i>m-steel.obj</code>. These differ whether the jetway is angled, perpendicular or straight relative to the aircraft, and in the (approximate) length <i><code>l</code></i> of the jetway in its retracted position. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Various versions of these jetway objects are supplied in this kit's <code>Jetways-Glass</code> and <code>Jetways-Steel</code> folders, named <code>AutoGate-<i>l</i>m-glass.obj</code>, <code>AutoGate-perpendicular-<i>l</i>m-glass.obj</code>, <code>AutoGate-straight-<i>l</i>m-glass.obj</code>, <code>AutoGate-<i>l</i>m-steel.obj</code>, <code>AutoGate-perpendicular-<i>l</i>m-steel.obj</code> and <code>AutoGate-straight-<i>l</i>m-steel.obj</code>. These differ whether the jetway is angled, perpendicular or straight relative to the aircraft, and in the (approximate) length <i><code>l</code></i> of the jetway in its retracted position. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 
 <p>To place an animated jetway into your scenery package:</p>
 <ul>
-  <li>First, copy one or more of the <code>AutoGate-*.obj</code> jetway objects from the <code>Jetways</code> folder into your scenery package;
+  <li>First, copy one or more of the <code>AutoGate-*.obj</code> jetway objects from the <code>Jetways-Glass</code> and/or <code>Jetways-Steel</code> folders into your scenery package:
     <ul>
-      <li>OverlayEditor: Use the <samp>Import</samp> button and navigate to the <code>Jetways</code> folder.</li>
-      <li>WED: Use Finder or Explorer to copy the jetway object(s) plus the associated textures <code>AutoGate2.dds</code> + <code>AutoGate2_LIT.dds</code> from the <code>Jetways</code> folder into your scenery package folder.</li>
+      <li>OverlayEditor: Drag the jetway object(s) from the <code>Jetways-Glass</code> or <code>Jetways-Steel</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
+      <li>WED: Use Finder or Explorer to copy the jetway object(s) plus the associated textures <code>AutoGate2.dds</code> + <code>AutoGate2_LIT.dds</code> from the <code>Jetways-Glass</code> or <code>Jetways-Steel</code> folder into your scenery package folder.</li>
     </ul>
-    Alternatively, just copy the whole <code>Jetways</code> folder into your scenery package (but don't forget to strip out unused objects before distributing).</li>
+    Alternatively, just copy the <code>Jetways-Glass</code> and/or <code>Jetways-Steel</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
   <li>Place the jetway objects in your scenery package just like any other 3D object. For correct operation the jetways <b>must</b> be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>An aircraft will be at the stopping position when the boarding door is level with the jetway object's &ldquo;origin&rdquo;. To visualise the jetway object's origin:
     <table>
@@ -155,16 +155,16 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 </ul>
 
 <p>Two types of DGS are supplied for use with in conjunction with an animated jetway - refer to the <a href="#standalone">Stand-alone</a> section for pictures. Use of a DGS is optional - the animated jetways work fine without it - but the pilot will find it difficult to stop the aircraft at the correct position if you don't include a DGS.</p>
-<p>Various versions of the DGS objects are supplied in this kit's <code>DGSs</code> folder, named <code>Safedock2S-<i>h</i>m<i>[-pole]</i>.obj</code> and <code>Safegate-<i>h</i>m<i>[-pole]</i>.obj</code>. These differ in the height <code><i>h</i></code> of the DGS above the ground, and whether the DGS is mounted on a pole. Gates intended for heavies will need the taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Various versions of the DGS objects are supplied in this kit's <code>DGSs_Safedock2S</code> and <code>DGSs_Safegate</code> folders, named <code>Safedock2S-<i>h</i>m<i>[-pole]</i>.obj</code> and <code>Safegate-<i>h</i>m<i>[-pole]</i>.obj</code>. These differ in the height <code><i>h</i></code> of the DGS above the ground, and whether the DGS is mounted on a pole. Gates intended for heavies will need the taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 
 <p>To add a DGS to your gate:</p>
 <ul>
-  <li>First, copy one or more of the DGS objects from the <code>DGSs</code> folder into your scenery package;
+  <li>First, copy one or more of the DGS objects from the <code>DGSs_Safedock2S</code> and/or <code>DGSs_Safegate</code> folder into your scenery package:
     <ul>
-      <li>OverlayEditor: Use the <samp>Import</samp> button and navigate to the <code>DGSs</code> folder.</li>
-      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> and/or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>DGSs</code> folder into your scenery package folder.</li>
+      <li>OverlayEditor: Drag the object(s) from the <code>DGSs_Safedock2S</code> or <code>DGSs_Safegate</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
+      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> or <code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>) from the <code>DGSs_Safedock2S</code> or <code>DGSs_Safegate</code> folder into your scenery package folder.</li>
     </ul>
-    Alternatively, just copy the whole <code>DGSs</code> folder into your scenery package (but don't forget to strip out unused objects before distributing).</li>
+    Alternatively, just copy the <code>DGSs_Safedock2S</code> and/or <code>DGSs_Safegate</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
   <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading as the jetways, which is the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>The DGS objects must be placed within this zone relative to the jetway object's origin:
     <table>
@@ -177,14 +177,14 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       </table>
   </li>
   <li>The older Safegate DGS works by parallax and so must be placed directly ahead of the pilot's seat.</li>
-  <li>There's a <code>greenzone.obj</code> object in the <code>DGSs</code> folder to help you with DGS positioning - place this object with the same origin and heading as the jetway object.</li>
+  <li>There's a <code>greenzone.obj</code> object in the <code>Helpers</code> folder to help you with DGS positioning - place this object with the same origin and heading as the jetway object.</li>
   <li>Place the DGS objects such that they are not inside the &ldquo;green zone&rdquo; of any any other AutoGate animated jetways or within 30m of any <u>stand-alone</u> DGSs.</li>
   <li>The DGS will remain blank or will display incorrect information if it is not placed next to an AutoGate jetway.</li>
 </ul>
 
 <h4><a id="static">Static Objects</a></h4>
 
-<p>Various static objects are supplied in this kit's <code>Jetways</code> folder:</p>
+<p>Various static objects are supplied in this kit's <code>Jetways-Glass</code> and <code>Jetways-Steel</code> folders:</p>
 <dl>
   <dt><code>StaticGate-<i>l</i>m-glass.obj</code>, <code>StaticGate-perpendicular-<i>l</i>m-glass.obj</code>, <code>StaticGate-straight-<i>l</i>m-glass.obj</code>, <code>StaticGate-<i>l</i>m-steel.obj</code>, <code>StaticGate-perpendicular-<i>l</i>m-steel.obj</code> and <code>StaticGate-straight-<i>l</i>m-steel.obj</code></dt>
   <dd>Static versions of the AutoGate jetways. These can be used when a static aircraft is parked at a gate. These can also be used in conjunction with a single AutoGate animated jetway at a gate which has multiple jetways.</dd>
@@ -199,7 +199,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <h4>Jetways</h4>
 
-<p>The static and animated glass and steel jetway objects all share common texture files <code>AutoGate2.dds</code> and <code>AutoGate2_LIT.dds</code> from the <code>Jetways</code> folder. You can edit or replace these files in your scenery package folder. These files  are very modestly sized; consider doubling their size if you want to add more detail. The file <code>PaintKit.png</code> also in the <code>Jetways</code> folder describes how the textures in these files map to the jetway objects.</p>
+<p>The static and animated glass and steel jetway objects share common texture files <code>AutoGate2.dds</code> and <code>AutoGate2_LIT.dds</code> in the <code>Jetways-Glass</code> and <code>Jetways-Steel</code> folders. You can edit or replace these files in your scenery package folder. These files  are very modestly sized; consider doubling their size if you want to add more detail. The file <code>PaintKit.png</code> in the <code>Helpers</code> folder describes how the textures in these files map to the jetway objects.</p>
 <p>You can edit the object files in a text editor to change the name of the texture files specified in the <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_lttex_file_namegt" target="_blank">TEXTURE<a></code> and <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_LIT_lttex_file_namegt" target="_blank">TEXTURE_LIT<a></code> statements, and save the object with a different filename. This allows you to have a mix of differently textured jetways. <small>(Note that the spacing rules described above still apply irrespective of the objects' filenames)</small>.</p>
 <p>The static, animated and extension/connector glass jetways are drawn in &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ATTR_layer_group_ltnamegt_ltoffsetgt" target="_blank">layer group</a>&rdquo; objects+4, objects+3 and objects+2 respectively, so that other scenery objects (which are normally drawn in layer group objects+0) can be viewed through the glass windows. If you have a number of glass objects at a gate you may need to change the <code>ATTR_layer_group objects <i>n</i></code> statements in some of the object files to change their relative drawing order; <i>i.e.</i> so that objects further from the terminal building are drawn later than objects closer to the terminal building.</p>
 
@@ -210,11 +210,11 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 <h3><a id="upgrade">Upgrading from version 1.2 and earlier of this kit</a></h3>
 
 <p>This kit and the associated AutoGate plugin require X-Plane version 9 or later. If you're designing a scenery package for X-Plane 8 then you should stick with a previous version of this kit and of the AutoGate plugin.</p>
-<p>The DGS objects in the <code>DGSs</code> and <code>Standalone_DGSs</code> folders are drop-in replacements for older objects of the same name, but use higher quality pre-compressed DDS textures. Use OverlayEditor's <samp>Import</samp> button, or use Finder or Explorer to replace your existing DGS objects and textures. Delete the old PNG textures <code>Safedock2S.png</code>, <code>Safedock2S_LIT.png</code>, <code>Safegate.png</code> and <code>Safegate_LIT.png</code> from your scenery package folder.</p>
+<p>The DGS objects in the <code>DGSs-Safedock2S</code>, <code>DGSs-Safegate</code>,  <code>Standalone-Safedock2S</code> and <code>Standalone-Safegate</code> folders are drop-in replacements for older objects of the same name, but use higher quality DDS textures. Use OverlayEditor's <samp>Import</samp> button, or use Finder or Explorer to replace your existing DGS objects and textures. Delete the old PNG textures <code>Safedock2S.png</code>, <code>Safedock2S_LIT.png</code>, <code>Safegate.png</code> and <code>Safegate_LIT.png</code> from your scenery package folder.</p>
 <p>There are no direct replacement for the old <code>AutoGate.obj</code> and <code>AutoGate-angled.obj</code> objects, but:</p>
 <ul>
-  <li><code>AutoGate-straight-20m-steel.obj</code> plus <code>JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate.obj</code>.</li>
-  <li><code>AutoGate-20m-steel.obj</code> plus <code>JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate-angled.obj</code>.</li>
+  <li><code>Jetways-Steel/AutoGate-straight-20m-steel.obj</code> plus <code>Jetways-Steel/JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate.obj</code>.</li>
+  <li><code>Jetways-Steel/AutoGate-20m-steel.obj</code> plus <code>Jetways-Steel/JetwayExt-10m-steel.obj</code> take up roughly the same space as the old <code>AutoGate-angled.obj</code>.</li>
 </ul>
 <p>You can mix old and new objects in your scenery package. <small>(Note that the spacing rules described above still apply irrespective of whether objects are old or new)</small>.</p>
 
