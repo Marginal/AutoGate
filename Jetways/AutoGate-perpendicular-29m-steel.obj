@@ -7833,7 +7833,7 @@ ANIM_end
 TRIS	4131 252
 ####_group	Cabin
 ANIM_begin
-	ANIM_trans	 -10.0000    4.0000   -0.0000	  -4.0000    4.0000   -0.0000	0 1.0	marginal.org.uk/autogate/lat
+	ANIM_trans	 -10.0000    4.0000   -0.0000	  -4.0000    4.0000   -0.0000	0 6.0	marginal.org.uk/autogate/lat
 	ANIM_begin
 		ANIM_trans	   0.0000    0.0000    0.0000	   0.0000   -2.0000    0.0000	0 -2.0	marginal.org.uk/autogate/vert
 		TRIS	4383 861
@@ -7859,10 +7859,10 @@ ANIM_begin
 			####_group	Jetway
 			TRIS	9102 324
 			ANIM_begin
-				ANIM_trans	  -5.4320    0.0000    0.0000	  -8.4620    0.0000    0.0000	0 1.0	marginal.org.uk/autogate/lat
+				ANIM_trans	  -5.4320    0.0000    0.0000	  -8.4620    0.0000    0.0000	0 6.0	marginal.org.uk/autogate/lat
 				TRIS	9426 96
 				ANIM_begin
-					ANIM_trans	   0.0670    0.0000    0.0000	  -2.9630    0.0000    0.0000	0 1.0	marginal.org.uk/autogate/lat
+					ANIM_trans	   0.0670    0.0000    0.0000	  -2.9630    0.0000    0.0000	0 6.0	marginal.org.uk/autogate/lat
 					TRIS	9522 48
 				ANIM_end
 			ANIM_end
