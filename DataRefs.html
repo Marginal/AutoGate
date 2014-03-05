@@ -38,6 +38,7 @@ use to construct your own DGS. The supplied DGSs include a static reduced level-
   <dd>2 - "Stop". The plane is at the stopping point.</dd>
   <dd>3 - "Stopped". The plane has stopped engines at the stopping point.</dd>
   <dd>4 - "Too far". The plane is beyond the stopping point.</dd>
+  <dd>5 - "ID fail". The plane approaching the gate does not have a valid doorway location.</dd>
   <dt>&nbsp;</dt>
   <dt><code>marginal.org.uk/dgs/track</code></dt>
   <dd>0 - "Idle/Stop/Too far". Either no plane is approaching the gate or the plane is at or beyond the stopping point (<code>status</code>=0, 2, 3 or 4).</dd>
@@ -50,7 +51,7 @@ use to construct your own DGS. The supplied DGSs include a static reduced level-
   <dd>0 - "Tracking on target" (<code>track</code>=2 or 3).</dd>
   <dd>1 - "Tracking left". The plane is to the left of the stopping point (<code>track</code>=2 or 3).</dd>
   <dd>2 - "Tracking right". The plane is to the right of the stopping point (<code>track</code>=2 or 3).</dd>
-  <dd>3 - "Stop/Too far". The plane is at or beyond the stopping point (<code>track</code>=0).</dd>
+  <dd>3 - "Stop/Too far/ID fail". The plane is at or beyond the stopping point (<code>track</code>=0).</dd>
   <dt>&nbsp;</dt>
   <dt><code>marginal.org.uk/dgs/azimuth</code></dt>
   <dd>0 if <code>track</code>=0 or 1.</dd>
@@ -65,21 +66,10 @@ use to construct your own DGS. The supplied DGSs include a static reduced level-
   <dd>Distance-6m (in increments of 0.5m) of the plane from the stopping point if <code>track</code>=2. Has value 6 if the plane is >12m from the stopping point.</dd>
   <dd>Distance (in increments of 0.5m) of the plane from the stopping point if <code>track</code>=3.</dd>
   <dt>&nbsp;</dt>
-  <dt><code>marginal.org.uk/dgs/id1</code></dt>
-  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
-  <dd>1 - A300, 2 - A310, 3 - A320, 4 - A330.</dd>
-  <dt>&nbsp;</dt>
-  <dt><code>marginal.org.uk/dgs/id2</code></dt>
-  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
-  <dd>1 - A340, 2 - A350, 3 - A380, 4 - B717.</dd>
-  <dt>&nbsp;</dt>
-  <dt><code>marginal.org.uk/dgs/id3</code></dt>
-  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
-  <dd>1 - B737, 2 - B747, 3 - B757, 4 - B767.</dd>
-  <dt>&nbsp;</dt>
-  <dt><code>marginal.org.uk/dgs/id4</code></dt>
-  <dd>0 if <code>status</code>&ne;1 or plane is other than:</dd>
-  <dd>1 - B777, 2 - B787, 3 - Avro/RJxx, 4 - unknown.</dd>
+  <dt><code>marginal.org.uk/dgs/icao</code></dt>
+  <dd>Array of 4 integers spelling out the ASCII code of the plane's ICAO model designation:</dd>
+  <dd>0 if <code>status</code>&ne;1</dd>
+  <dd>space, &lsquo;0&rsquo;-&lsquo;9&rsquo; or &lsquo;A&rsquo;-&lsquo;Z&rsquo; if <code>status</code>=1</dd>
 </dl>
 
 <hr>

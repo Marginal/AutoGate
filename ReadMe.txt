@@ -31,8 +31,8 @@ Compatible Planes
 -----------------
 * This plugin works with any plane that has a "boarding door location" entered
   on the Standard->Viewpoint screen in Plane-Maker.
-* Docking guidance systems will display Airbus and Boeing model numbers if the
-  correct "ICAO code" has been entered on the Standard->Viewpoint screen.
+* Docking guidance systems will display aircraft model numbers if a valid
+  "ICAO code" has been entered on the Standard->Viewpoint screen.
 
 
 Version 1.50

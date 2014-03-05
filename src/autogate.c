@@ -37,12 +37,13 @@ static XPLMDataRef ref_total_running_time_sec;
 
 /* Published DataRefs */
 static XPLMDataRef ref_vert, ref_lat, ref_moving;
-static XPLMDataRef ref_status, ref_id1, ref_id2, ref_id3, ref_id4, ref_lr, ref_track;
+static XPLMDataRef ref_status, ref_icao, ref_id1, ref_id2, ref_id3, ref_id4, ref_lr, ref_track;
 static XPLMDataRef ref_azimuth, ref_distance, ref_distance2;
 
 /* Published DataRef values */
 float lat, vert, moving;
-static float status, id1, id2, id3, id4, lr, track;
+static int status, id1, id2, id3, id4, lr, track;
+static int icao[4];
 static float azimuth, distance, distance2;
 
 /* Internal state */
@@ -58,8 +59,13 @@ static void newplane(void);
 static void resetidle(void);
 
 static XPLMDataRef floatref(char*, XPLMGetDataf_f, float*);
-static float getgate(XPLMDataRef);
-static float getdgs(XPLMDataRef);
+static XPLMDataRef intref(char*, XPLMGetDatai_f, int*);
+static XPLMDataRef intarrayref(char *, XPLMGetDatavi_f, int*);
+static float getgatefloat(XPLMDataRef);
+static int getdgs(void);
+static float getdgsfloat(XPLMDataRef);
+static int getdgsint(XPLMDataRef);
+static int getdgsicao(XPLMDataRef, int*, int, int);
 
 static void localpos(float, float, float, float, float *, float *, float *);
 static void updaterefs(float, float, float, float);
@@ -68,7 +74,7 @@ static void updaterefs(float, float, float, float);
 static void drawdebug(XPLMWindowID, void *);
 #endif
 
-/* Known planes */
+/* Known plane descriptions */
 static const db_t planedb[]={/* lng   lat  vert  type */
     {"A300",	21.0, -8.0, -1.0,  0},
     {"A310",	18.0, -8.0, -1.0,  1},
@@ -106,7 +112,7 @@ static const db_t planedb[]={/* lng   lat  vert  type */
     {"MD11",	17.0, -7.7, -1.4, 15},
 };
 
-/* Known planes */
+/* Known plane ICAOs */
 static const icao_t icaodb[]={
     {"A30",  0},
     {"A3ST", 0},
@@ -132,6 +138,26 @@ static const icao_t icaodb[]={
     {"B78",  13},
     {"RJ",   14},
     {"B46",  14},
+};
+
+/* Canonical ICAOs for known planes */
+static char canonical[16][5] = {
+    "A300",
+    "A310",
+    "A320",
+    "A330",
+    "A340",
+    "A350",
+    "A380",
+    "B717",
+    "B737",
+    "B747",
+    "B757",
+    "B767",
+    "B777",
+    "B787",
+    "AVRO",
+    "APRH",
 };
 
 
@@ -165,23 +191,24 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     ref_view_external  =XPLMFindDataRef("sim/graphics/view/view_is_external");
 
     /* Published Datarefs */
-    ref_vert     =floatref("marginal.org.uk/autogate/vert", getgate, &vert);
-    ref_lat      =floatref("marginal.org.uk/autogate/lat",  getgate, &lat);
-    ref_moving   =floatref("marginal.org.uk/autogate/moving", getgate, &moving);
+    ref_vert     =floatref("marginal.org.uk/autogate/vert", getgatefloat, &vert);
+    ref_lat      =floatref("marginal.org.uk/autogate/lat",  getgatefloat, &lat);
+    ref_moving   =floatref("marginal.org.uk/autogate/moving", getgatefloat, &moving);
 
-    ref_status   =floatref("marginal.org.uk/dgs/status",    getdgs, &status);
-    ref_id1      =floatref("marginal.org.uk/dgs/id1",       getdgs, &id1);
-    ref_id2      =floatref("marginal.org.uk/dgs/id2",       getdgs, &id2);
-    ref_id3      =floatref("marginal.org.uk/dgs/id3",       getdgs, &id3);
-    ref_id4      =floatref("marginal.org.uk/dgs/id4",       getdgs, &id4);
-    ref_lr       =floatref("marginal.org.uk/dgs/lr",        getdgs, &lr);
-    ref_track    =floatref("marginal.org.uk/dgs/track",     getdgs, &track);
-    ref_azimuth  =floatref("marginal.org.uk/dgs/azimuth",   getdgs, &azimuth);
-    ref_distance =floatref("marginal.org.uk/dgs/distance",  getdgs, &distance);
-    ref_distance2=floatref("marginal.org.uk/dgs/distance2", getdgs, &distance2);
+    ref_status   =  intref("marginal.org.uk/dgs/status",    getdgsint, &status);
+    ref_icao  =intarrayref("marginal.org.uk/dgs/icao",      getdgsicao, icao);
+    ref_id1      =  intref("marginal.org.uk/dgs/id1",       getdgsint, &id1);
+    ref_id2      =  intref("marginal.org.uk/dgs/id2",       getdgsint, &id2);
+    ref_id3      =  intref("marginal.org.uk/dgs/id3",       getdgsint, &id3);
+    ref_id4      =  intref("marginal.org.uk/dgs/id4",       getdgsint, &id4);
+    ref_lr       =  intref("marginal.org.uk/dgs/lr",        getdgsint, &lr);
+    ref_track    =  intref("marginal.org.uk/dgs/track",     getdgsint, &track);
+    ref_azimuth  =floatref("marginal.org.uk/dgs/azimuth",   getdgsfloat, &azimuth);
+    ref_distance =floatref("marginal.org.uk/dgs/distance",  getdgsfloat, &distance);
+    ref_distance2=floatref("marginal.org.uk/dgs/distance2", getdgsfloat, &distance2);
 
 #ifdef DEBUG
-    windowId = XPLMCreateWindow(10, 750, 310, 650, 1, drawdebug, NULL, NULL, NULL);
+    windowId = XPLMCreateWindow(10, 750, 310, 640, 1, drawdebug, NULL, NULL, NULL);
 #endif
     XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
     XPLMRegisterFlightLoopCallback(initsoundcallback, -1, NULL);	/* Deferred initialisation */
@@ -254,13 +281,13 @@ static void newplane(void)
     else
         door_x=door_y=door_z=0;
 
-    if ((!door_x || plane_type==15) &&
-        XPLMGetDatab(ref_acf_descrip, acf_descrip, 0, 128))
-        /* Try table */
+    if ((!door_x || plane_type==15) && XPLMGetDatab(ref_acf_descrip, acf_descrip, 0, 128))
+        /* Try descriptions */
         for (i=0; i<sizeof(planedb)/sizeof(db_t); i++)
             if (strstr(acf_descrip, planedb[i].key) && (door_x || planedb[i].lat))
             {
-                plane_type=planedb[i].type;
+                if (plane_type==15)
+                    plane_type=planedb[i].type;
                 if (!door_x)
                 {
                     door_x = F2M * planedb[i].lat;
@@ -270,8 +297,25 @@ static void newplane(void)
                 break;
             }
 
-    /* If have data, check for alignment at a gate during next frame */
-    state = door_x ? NEWPLANE : IDFAIL;
+    if (!door_x)
+    {
+        state = IDLE;
+        icao[0]=icao[1]=icao[2]=icao[3]=0;
+    }
+    else
+    {
+        int i;
+        state = NEWPLANE;	/* Check for alignment at a gate during next frame */
+
+        if (isupper(acf_icao[0]) || isdigit(acf_icao[0]))
+            /* DGS objects fall back to using id1-4 datarefs if first character of ICAO field is null */
+            for (i=0; i<4; i++)
+                icao[i] = (isupper(acf_icao[i]) || isdigit(acf_icao[i])) ? acf_icao[i] : ' ';
+        else
+            /* Display canonical ICAO type */
+            for (i=0; i<4; i++)
+                icao[i] = canonical[plane_type][i];
+    }
 }
 
 static void resetidle(void)
@@ -285,13 +329,11 @@ static void resetidle(void)
     stopalert();
 }
 
-static float getgate(XPLMDataRef inRefcon)
+static float getgatefloat(XPLMDataRef inRefcon)
 {
     float now, object_x, object_y, object_z, object_h;
     float local_x, local_y, local_z;
 	
-    if (state <= IDFAIL) return 0;
-
     object_x=XPLMGetDataf(ref_draw_object_x);
     object_y=XPLMGetDataf(ref_draw_object_y);
     object_z=XPLMGetDataf(ref_draw_object_z);
@@ -345,6 +387,10 @@ static float getgate(XPLMDataRef inRefcon)
             running |= (XPLMGetDataf(ref_parkingbrake) < 0.5f);
             state = running ? TRACK : DOCKED;
         }
+        else if (!door_x)
+        {
+            state = IDFAIL;
+        }
         else
         {
             /* Approaching gate */
@@ -361,7 +407,7 @@ static float getgate(XPLMDataRef inRefcon)
 }
 
 
-static float getdgs(XPLMDataRef inRefcon)
+static int getdgs(void)
 {
     float now, object_x, object_y, object_z;
     float local_x, local_y, local_z;
@@ -399,7 +445,7 @@ static float getdgs(XPLMDataRef inRefcon)
     now=XPLMGetDataf(ref_total_running_time_sec);
     if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
         /* Same rendering pass and object as last calculation */
-        return *(float*)inRefcon;
+        return -1;
     else
     {
         last_update=now;
@@ -412,7 +458,38 @@ static float getdgs(XPLMDataRef inRefcon)
     localpos(gate_x, gate_y, gate_z, gate_h, &local_x, &local_y, &local_z);
 
     updaterefs(now, local_x, local_y, local_z);
-    return *(float*)inRefcon;
+    return -1;
+}
+
+static float getdgsfloat(XPLMDataRef inRefcon)
+{
+    return getdgs() ? *(float*)inRefcon : 0;
+}
+
+static int getdgsint(XPLMDataRef inRefcon)
+{
+    return getdgs() ? *(int*)inRefcon : 0;
+}
+
+static int getdgsicao(XPLMDataRef inRefcon, int *outValues, int inOffset, int inMax)
+{
+    int i;
+
+    if (outValues==NULL)
+        return 4;
+    else if (inMax<=0 || inOffset<0 || inOffset>=4)
+        return 0;
+
+    if (inMax+inOffset > 4)
+        inMax = 4-inOffset;
+
+    /* We get called a lot, so don't bother checking for updated values */
+    if (state != TRACK)	/* Only report when active and tracking */
+        for (i=0; i<inMax; outValues[i++] = 0);
+    else
+        for (i=0; i<inMax; i++) outValues[i] = icao[inOffset+i];
+
+    return inMax;
 }
 
 
@@ -457,6 +534,11 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
 
     switch (state)
     {
+    case IDFAIL:
+        lr=3;	/* Stop */
+        status=5;
+        break;
+
     case TRACK:
         if (locgood)
         {
@@ -609,6 +691,16 @@ static XPLMDataRef floatref(char *inDataName, XPLMGetDataf_f inReadFloat, float 
 {
     return XPLMRegisterDataAccessor(inDataName, xplmType_Float, 0, NULL, NULL, inReadFloat, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, inRefcon, 0);
 }
+
+static XPLMDataRef intref(char *inDataName, XPLMGetDatai_f inReadInt, int *inRefcon)
+{
+    return XPLMRegisterDataAccessor(inDataName, xplmType_Int, 0, inReadInt, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, inRefcon, 0);
+}
+
+static XPLMDataRef intarrayref(char *inDataName, XPLMGetDatavi_f inReadIntArray, int *inRefcon)
+{
+    return XPLMRegisterDataAccessor(inDataName, xplmType_IntArray, 0, NULL, NULL, NULL, NULL, NULL, NULL, inReadIntArray, NULL, NULL, NULL, NULL, NULL, inRefcon, 0);
+}
 	
 
 /* Log to Log.txt. Returns 0 because that's a failure return code from most XP entry points */
@@ -647,15 +739,13 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     XPLMDrawString(color, left + 5, top - 60, buf, 0, xplmFont_Basic);
     sprintf(buf, "Time : %10.3f", timestamp);
     XPLMDrawString(color, left + 5, top - 70, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Data : %6.3f %6.3f %1.0f %1.0f %1.0f %1.0f %1.0f %1.0f %1.0f %4.1f %4.1f %4.1f",
-            lat, vert,
-            status, id1, id2, id3, id4,
-            lr, track,
-            azimuth, distance, distance2);
+    sprintf(buf, "Data : %1d %6.3f %6.3f %1d %1d %4.1f %4.1f %4.1f", status, lat, vert, lr, track, azimuth, distance, distance2);
     XPLMDrawString(color, left + 5, top - 80, buf, 0, xplmFont_Basic);
+    sprintf(buf, "ID   : %1d %1d %1d %1d %2x %c%c%c%c", id1, id2, id3, id4, icao[0], icao[0], icao[1], icao[2], icao[3]);
+    XPLMDrawString(color, left + 5, top - 90, buf, 0, xplmFont_Basic);
     alGetSourcefv(snd_src, AL_POSITION, pos);
     alGetSourcefv(snd_src, AL_GAIN, &gain);
     sprintf(buf, "Sound: %10.3f %10.3f %10.3f %6.2f", pos[0], pos[1], pos[2], gain);
-    XPLMDrawString(color, left + 5, top - 90, buf, 0, xplmFont_Basic);
+    XPLMDrawString(color, left + 5, top -100, buf, 0, xplmFont_Basic);
 }				    
 #endif

@@ -11,6 +11,7 @@
 #  define _CRT_SECURE_NO_DEPRECATE
 #endif
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,7 +90,7 @@ extern ALuint snd_src;	/* for drawdebug() */
 /* types */
 typedef enum
 {
-    DISABLED=0, IDFAIL, NEWPLANE, IDLE, TRACK, GOOD, BAD, ENGAGE, DOCKED, DISENGAGE, DISENGAGED
+    DISABLED=0, NEWPLANE, IDLE, IDFAIL, TRACK, GOOD, BAD, ENGAGE, DOCKED, DISENGAGE, DISENGAGED
 } state_t;
 
 typedef struct {

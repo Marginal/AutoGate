@@ -31,15 +31,15 @@ for obj in ['Safedock2S-%sm.obj',
                     float(tokens[7]),float(tokens[8])))
             elif tokens[0]=='ANIM_trans' and float(tokens[2])>cut:
                 #print line
-                assert(line[71]=='\t')
-                outfile.write("\tANIM_trans\t%9.4f %9.4f %9.4f\t%9.4f %9.4f %9.4f%s" % (
+                outfile.write("%sANIM_trans\t%9.4f %9.4f %9.4f\t%9.4f %9.4f %9.4f\t%s" % (
+                    line.split('A')[0],
                     float(tokens[1]),
                     float(tokens[2])-refheight+height,
                     float(tokens[3]),
                     float(tokens[4]),
                     float(tokens[5])-refheight+height,
                     float(tokens[6]),
-                    line[71:]))
+                    line.split(None,7)[-1]))
             else:
                 outfile.write(line)
 
@@ -80,7 +80,7 @@ for obj in ['SA-%sm-Safedock2S-%sm.obj',
                         newdist,
                         float(tokens[4]),float(tokens[5]),float(tokens[6]),
                         float(tokens[7]),float(tokens[8])))
-                elif tokens[0]=='ANIM_trans' and line[71]=='\t':
+                elif tokens[0]=='ANIM_trans':
                     if float(tokens[2])>cut:
                         newheight1=float(tokens[2])-refheight+height
                         newheight2=float(tokens[5])-refheight+height
@@ -93,14 +93,15 @@ for obj in ['SA-%sm-Safedock2S-%sm.obj',
                     else:
                         newdist1=float(tokens[3])
                         newdist2=float(tokens[6])
-                    outfile.write("\tANIM_trans\t%9.4f %9.4f %9.4f\t%9.4f %9.4f %9.4f%s" % (
+                    outfile.write("%sANIM_trans\t%9.4f %9.4f %9.4f\t%9.4f %9.4f %9.4f\t%s" % (
+                        line.split('A')[0],
                         float(tokens[1]),
                         newheight1,
                         newdist1,
                         float(tokens[4]),
                         newheight2,
                         newdist2,
-                        line[71:]))
+                        line.split(None,7)[-1]))
                 else:
                     outfile.write(line)
                     
