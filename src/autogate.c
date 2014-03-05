@@ -334,14 +334,27 @@ static float getgatefloat(XPLMDataRef inRefcon)
     float now, object_x, object_y, object_z, object_h;
     float local_x, local_y, local_z;
 	
+    now=XPLMGetDataf(ref_total_running_time_sec);
     object_x=XPLMGetDataf(ref_draw_object_x);
     object_y=XPLMGetDataf(ref_draw_object_y);
     object_z=XPLMGetDataf(ref_draw_object_z);
     if (state>IDLE && (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z))
+    {
         /* We're tracking and it's not by this gate */
+        if (now-last_update > POLLTIME)
+        {
+            /* We haven't seen our gate in a while - check we're still in range in case we've been moved across the airport */
+            last_update = now-0.0001f;
+            localpos(gate_x, gate_y, gate_z, gate_h, &local_x, &local_y, &local_z);
+            if (fabsf(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
+                resetidle();	/* Just gone out of range of the tracking gate */
+                /* Fall through */
+            else
+                return 0;
+        }
         return 0;
+    }
 
-    now=XPLMGetDataf(ref_total_running_time_sec);
     if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
         /* Same rendering pass and object as last calculation */
         return *(float*)inRefcon;
