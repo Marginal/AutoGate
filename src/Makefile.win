@@ -3,7 +3,7 @@
 
 !include ..\version.mak
 
-XPSDK=..\..\XPSDK212
+XPSDK=..\..\XPSDK213
 OPENAL=..\..\openal-soft-1.15.1-bin
 
 CC=cl
