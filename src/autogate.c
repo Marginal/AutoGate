@@ -50,6 +50,7 @@ static float azimuth, distance, distance2;
 static float last_x, last_y, last_z;		/* last object examined */
 static float last_update=0;			/* and the time we examined it */
 float gate_x, gate_y, gate_z, gate_h;		/* active gate */
+int gate_autogate;				/* active gate is an AutoGate, not a standalone dummy */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
 
 
@@ -322,6 +323,7 @@ static void resetidle(void)
 {
     state=IDLE;
     gate_x=gate_y=gate_z=gate_h=0;
+    gate_autogate=0;
     dgs_x=dgs_y=dgs_z=0;
     vert=lat=moving=0;
     status=id1=id2=id3=id4=lr=track=0;
@@ -414,7 +416,10 @@ static float getgatefloat(XPLMDataRef inRefcon)
         gate_z=object_z;
         gate_h=object_h;
     }
-	
+
+    if ((float*)inRefcon == &lat)
+        gate_autogate = -1;	/* Standalone DGS dummy gate only uses vert */
+
     updaterefs(now, local_x, local_y, local_z);
     return *(float*)inRefcon;
 }
@@ -646,7 +651,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             status=3;	/* OK */
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
-            if (!moving) playalert();
+            if (!moving && gate_autogate) playalert();
             moving=1;
         }
         else
@@ -682,7 +687,7 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
             float ratio=1 - (now-timestamp)/DURATION;
             lat =(door_x-OBJ_X) * ratio;
             vert=(local_y-OBJ_Y) * ratio;
-            if (!moving) playalert();
+            if (!moving && gate_autogate) playalert();
             moving=1;
         }
         break;
