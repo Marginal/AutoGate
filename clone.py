@@ -3,15 +3,17 @@
 # Given v7 and v8 objects at 6m, create versions at different heights
 #
 
+from os import listdir
+
 refheight=6
 cut=3
 
 for thing in ['Safedock2S', 'Safegate']:
     for pole in ['','-pole']:
         for height in [3, 3.5, 4, 4.5, 5, 5.5, 6.5, 7, 7.5, 8]:
-            infilename=("DGSs-%s/%s-%sm%s.obj") % (thing, thing, refheight, pole)
+            infilename = "DGSs-%s/%s-%sm%s.obj" % (thing, thing, refheight, pole)
             infile=file(infilename, 'rt')
-            outfilename=("DGSs-%s/%s-%sm%s.obj") % (thing, thing, height, pole)
+            outfilename = "DGSs-%s/%s-%sm%s.obj" % (thing, thing, height, pole)
             outfile=file(outfilename, 'wt')
             print outfilename
 
@@ -50,9 +52,9 @@ for thing in ['Safedock2S', 'Safegate']:
     for dist in [16, 18, 20, 22, 24, 26, 28, 30]:
         for height in [3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8]:
             if height==refheight and dist==refdist: continue
-            infilename=("Standalone-%s/SA-%sm-%s-%sm.obj") % (thing, refdist, thing, refheight)
+            infilename = "Standalone-%s/SA-%sm-%s-%sm.obj" % (thing, refdist, thing, refheight)
             infile=file(infilename, 'rt')
-            infilename=("Standalone-%s/SA-%sm-%s-%sm.obj") % (thing, dist, thing, height)
+            outfilename = "Standalone-%s/SA-%sm-%s-%sm.obj" % (thing, dist, thing, height)
             outfile=file(outfilename, 'wt')
             print outfilename
 
@@ -103,3 +105,28 @@ for thing in ['Safedock2S', 'Safegate']:
                     
             outfile.close()
             infile.close()
+
+for place in ['DGSs-Safedock2S', 'Standalone-Safedock2S']:
+    for thing in listdir(place):
+        if not '2S' in thing or not thing.endswith('.obj'):
+            continue
+        infilename = '%s/%s' % (place, thing)
+        infile=file(infilename, 'rt')
+        outfilename = ('%s/%s' % (place, thing)).replace('2S','T2')
+        outfile=file(outfilename, 'wt')
+        print outfilename
+
+        for line in infile:
+            tokens=line.split()
+            if not tokens:
+                outfile.write('\n')
+                continue
+            if tokens[0]=='TEXTURE':
+                outfile.write("TEXTURE\t\tSafedockT2.dds\n")
+            elif tokens[0]=='TEXTURE_LIT':
+                outfile.write("TEXTURE_LIT\tSafedockT2_LIT.dds\n")
+            else:
+                outfile.write(line)
+
+        outfile.close()
+        infile.close()
