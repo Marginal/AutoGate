@@ -13,7 +13,10 @@ Installation
 ------------
 * Quit X-Plane if you have it running.
 * Remove any existing AutoGate plugin from your X-Plane/Resources/plugins folder.
-* Copy the AutoGate folder into your X-Plane/Resources/plugins folder.
+* Copy the "AutoGate" folder into your X-Plane/Resources/plugins folder.
+* Re-start X-Plane.
+* You can verify that you have correctly installed the plugin by checking that it
+  is listed on the Plugins → Plugin Admin → Plugin Information screen in X-Plane.
 
 
 Operation
@@ -30,9 +33,9 @@ Operation
 Compatible Planes
 -----------------
 * This plugin works with any plane that has a "boarding door location" entered
-  on the Standard->Viewpoint screen in Plane-Maker.
-* Docking guidance systems will display aircraft model numbers if a valid
-  "ICAO code" has been entered on the Standard->Viewpoint screen.
+  on the Standard → Viewpoint screen in Plane-Maker.
+* Docking Guidance Systems will display aircraft model numbers if a valid
+  "ICAO code" has been entered on the Standard → Viewpoint screen.
 
 
 Version 1.60
