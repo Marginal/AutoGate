@@ -32,7 +32,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <h3>Overview</h3>
 
-<p>This kit allows X-Plane scenery designers to add animated jetway and docking guidance systems (DGS) to scenery packages. Two types of jetway and three types of DGS are included.</p>
+<p>This kit allows X-Plane scenery designers to add animated jetway and docking guidance systems (DGS) to scenery packages. Two types of jetway and four types of DGS are included.</p>
 </p>
 <p>The jetway animates to &ldquo;dock&rdquo; with the plane's main door when the pilot engages the parking brake and shuts down the plane's engines with the plane within &frac12;m of the correct stopping position. The DGS guides the pilot to the correct stopping position.</p>
 <p> An <a href="http://marginal.org.uk/x-planescenery/AutoGate%20Demo.zip">example</a> scenery package built using this kit is available. Please see the notes <a href="#upgrade">below</a> if you're upgrading from an earlier of this kit.</p>
@@ -49,7 +49,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <h4><a id="standalone">Stand-alone Docking Guidance Systems</a></h4>
 
-<p>Two types of DGS are supplied for use <u>without</u> an accompanying animated jetway, <i>e.g.</i> for use at apron parking stands:<p>
+<p>Four types of DGS are supplied for use <u>without</u> an accompanying animated jetway, <i>e.g.</i> for use at apron parking stands:<p>
 <table>
   <tfoot>
     <tr>
@@ -57,6 +57,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       <th>Safegate<small><sup>&reg;</sup></small> inductive-loop DGS</th>
       <th>Safedock<small><sup>&reg;</sup></small>2S advanced DGS</th>
       <th>Safedock<small><sup>&reg;</sup></small>T2 advanced DGS</th>
+      <th>Human marshaller</th>
     </tr>
   </tfoot>
   <tbody>
@@ -65,20 +66,21 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
       <td><img alt="Safegate screenshot" src="imgs/Safegate.jpeg"></td>
       <td><img alt="Safedock2S screenshot" src="imgs/Safedock2S.jpeg"></td>
       <td><img alt="SafedockT2 screenshot" src="imgs/SafedockT2.jpeg"></td>
+      <td><img alt="Marshaller screenshot" src="imgs/Marshaller.jpeg"></td>
     </tr>
   </tbody>
 </table>
-<p>Various versions of these stand-alone DGS objects are supplied in this kit's <code>Standalone_Safegate</code>, <code>Standalone_Safedock2S</code> and <code>Standalone_SafedockT2</code> folders, named <code>SA-<i>d</i>m-Safegate-<i>h</i>m.obj</code>, <code>SA-<i>d</i>m-Safedock2S-<i>h</i>m.obj</code> and <code>SA-<i>d</i>m-SafedockT2-<i>h</i>m.obj</code>. These objects differ in the distance <code><i>d</i></code> between the stopping point and the DGS, and in the height <code><i>h</i></code> of the DGS above the ground. Parking stands intended for heavies will need the further and taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Various versions of these stand-alone DGS objects are supplied in this kit's <code>Standalone-Safegate</code>, <code>Standalone-Safedock2S</code>, <code>Standalone-SafedockT2</code> and <code>Standalone-Marshaller</code> folders, named <code>SA-<i>d</i>m-Safegate-<i>h</i>m.obj</code>, <code>SA-<i>d</i>m-Safedock2S-<i>h</i>m.obj</code>, <code>SA-<i>d</i>m-SafedockT2-<i>h</i>m.obj</code> and  <code>SA-<i>d</i>m-Marshaller.obj</code>. These objects differ in the distance <code><i>d</i></code> between the stopping point and the DGS, and in the height <code><i>h</i></code> of the DGS above the ground. Parking stands intended for heavies will need the further and taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 </p>
 
 <p>To place a stand-alone DGS into your scenery package:</p>
 <ul>
-  <li>First, copy one or more of the DGS objects from the <code>Standalone_Safegate</code>, <code>Standalone_Safedock2S</code> and/or <code>Standalone_SafedockT2</code> folders into your scenery package:
+  <li>First, copy one or more of the DGS objects from the <code>Standalone-Safegate</code>, <code>Standalone-Safedock2S</code>, <code>Standalone-SafedockT2</code> and/or <code>Standalone-Marhsaller</code> folders into your scenery package:
     <ul>
-      <li>OverlayEditor: Drag the object(s) from the <code>Standalone_Safegate</code>, <code>Standalone_Safedock2S</code> or <code>Standalone_SafedockT2</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
-      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>, <code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> or <code>SafedockT2.dds</code> + <code>SafedockT2_LIT.dds</code>) from the <code>Standalone_Safegate</code>, <code>Standalone_Safedock2S</code> or <code>Standalone_SafedockT2</code> folder into your scenery package folder.</li>
+      <li>OverlayEditor: Drag the object(s) from the <code>Standalone-Safegate</code>, <code>Standalone-Safedock2S</code>, <code>Standalone-SafedockT2</code> or <code>Standalone-Marshaller</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
+      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>, <code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code>, <code>SafedockT2.dds</code> + <code>SafedockT2_LIT.dds</code> or <code>Marshaller.dds</code> + <code>Marshaller_LIT.dds</code>) from the <code>Standalone-Safegate</code>, <code>Standalone-Safedock2S</code>, <code>Standalone-SafedockT2</code> or <code>Standalone-Marshaller</code> folder into your scenery package folder.</li>
     </ul>
-    Alternatively, just copy the entire <code>Standalone_Safegate</code>, <code>Standalone_Safedock2S</code> and/or <code>Standalone_SafedockT2</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
+    Alternatively, just copy the entire <code>Standalone-Safegate</code>, <code>Standalone-Safedock2S</code>, <code>Standalone-SafedockT2</code> and/or <code>Standalone-Marshaller</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
   <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>An aircraft will be at the stopping position when the boarding door is level with the DGS object's &ldquo;origin&rdquo; (so if your scenery includes static jetways, place the DGS so that the origin is roughly level with the jetway door). To visualise the DGS object's origin:
     <table>
@@ -156,17 +158,17 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
   <li>Place the animated jetway objects with their origins more than 20m away from any other AutoGate animated jetways and from any <u>stand-alone</u> DGSs.</li>
 </ul>
 
-<p>Three types of DGS are supplied for use with in conjunction with an animated jetway - refer to the <a href="#standalone">Stand-alone</a> section for pictures. Use of a DGS is optional - the animated jetways work fine without it - but the pilot will find it difficult to stop the aircraft at the correct position if you don't include a DGS.</p>
-<p>Various versions of the DGS objects are supplied in this kit's <code>DGSs_Safegate</code>, <code>DGSs_Safedock2S</code> and <code>DGSs_SafedockT2</code> folders, named <code>Safegate-<i>h</i>m<i>[-pole]</i>.obj</code>, <code>Safedock2S-<i>h</i>m<i>[-pole]</i>.obj</code> and <code>SafedockT2-<i>h</i>m<i>[-pole]</i>.obj</code>. These differ in the height <code><i>h</i></code> of the DGS above the ground, and whether the DGS is mounted on a pole. Gates intended for heavies will need the taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
+<p>Four types of DGS are supplied for use with in conjunction with an animated jetway - refer to the <a href="#standalone">Stand-alone</a> section for pictures. Use of a DGS is optional - the animated jetways work fine without it - but the pilot will find it difficult to stop the aircraft at the correct position if you don't include a DGS.</p>
+<p>Various versions of the DGS objects are supplied in this kit's <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> and <code>DGSs-Marshaller</code> folders, named <code>Safegate-<i>h</i>m<i>[-pole]</i>.obj</code>, <code>Safedock2S-<i>h</i>m<i>[-pole]</i>.obj</code>, <code>SafedockT2-<i>h</i>m<i>[-pole]</i>.obj</code> and <code>Marshaller.obj</code>. These differ in the height <code><i>h</i></code> of the DGS above the ground, and whether the DGS is mounted on a pole. Gates intended for heavies will need the taller DGSs. You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 
 <p>To add a DGS to your gate:</p>
 <ul>
-  <li>First, copy one or more of the DGS objects from the <code>DGSs_Safegate</code>, <code>DGSs_Safedock2S</code> and/or <code>DGSs_SafedockT2</code> folder into your scenery package:
+  <li>First, copy one or more of the DGS objects from the <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> and/or <code>DGSs-Marshaller</code> folder into your scenery package:
     <ul>
-      <li>OverlayEditor: Drag the object(s) from the <code>DGSs_Safegate</code>, <code>DGSs_Safedock2S</code> or <code>DGSs_SafedockT2</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
-      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>, <code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code> or <code>SafedockT2.dds</code> + <code>SafedockT2_LIT.dds</code>) from the <code>DGSs_Safegate</code>, <code>DGSs_Safedock2S</code> or <code>DGSs_SafedockT2</code> folder into your scenery package folder.</li>
+      <li>OverlayEditor: Drag the object(s) from the <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> or <code>DGSs-Marshaller</code> folder and drop onto OverlayEditor's <samp>list&nbsp;of&nbsp;objects</samp>.</li>
+      <li>WED: Use Finder or Explorer to copy the DGS object(s) plus the associated textures (<code>Safegate.dds</code> + <code>Safegate_LIT.dds</code>, <code>Safedock2S.dds</code> + <code>Safedock2S_LIT.dds</code>, <code>SafedockT2.dds</code> + <code>SafedockT2_LIT.dds</code> or <code>Marshaller.dds</code> + <code>Marshaller_LIT.dds</code>) from the <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> or <code>DGSs-Marshaller</code> folder into your scenery package folder.</li>
     </ul>
-    Alternatively, just copy the entire <code>DGSs_Safegate</code>, <code>DGSs_Safedock2S</code> and/or <code>DGSs_SafedockT2</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
+    Alternatively, just copy the entire <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> and/or <code>DGSs-Marshaller</code> folder(s) into your scenery package (but don't forget to strip out unused objects before distributing, <i>e.g.</i> using the <a href="http://marginal.org.uk/x-planescenery/tools.html#xpublish" target="_blank">X-Publish</a> tool).</li>
   <li>Place the DGS objects in your scenery package just like any other 3D object. For correct operation the DGSs <b>must</b> be placed with the same heading as the jetways, which is the same heading that the aircraft will have when it is stopped at the stand.</li>
   <li>The DGS objects must be placed within this zone relative to the jetway object's origin:
     <table>
@@ -238,6 +240,7 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 
 <p>&ldquo;X-Plane&rdquo; is a registered trademark of <a href="http://www.x-plane.com/">Laminar Research</a>.</p>
 <p>&ldquo;Safedock&rdquo; and &ldquo;Safegate&rdquo; are registered trademarks of <a href="http://www.safegate.com/" target="_blank">Safegate Group</a>. Safegate Group is not associated with and does not endorse this scenery kit.</p>
+<p>Marshaller figure courtesy of <a href="http://hosting.x-plane.org/mr3d/website/" target="_blank">Mr 3D</a>.</p>
 
 <h3>License</h3>
 

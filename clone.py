@@ -48,6 +48,43 @@ for thing in ['Safedock2S', 'Safegate']:
 
 refdist=20
 
+thing = 'Marshaller'
+for dist in [16, 18, 20, 22, 24, 26, 28, 30]:
+    if dist==refdist: continue
+    infilename = "Standalone-%s/SA-%sm-%s.obj" % (thing, refdist, thing)
+    infile=file(infilename, 'rt')
+    outfilename = "Standalone-%s/SA-%sm-%s.obj" % (thing, dist, thing)
+    outfile=file(outfilename, 'wt')
+    print outfilename
+
+    for line in infile:
+        tokens=line.split()
+        if not tokens:
+            outfile.write('\n')
+            continue
+        if tokens[0]=='VT' and float(tokens[3])<-cut:
+            outfile.write("VT\t%9.4f %9.4f %9.4f\t%6.3f %6.3f %6.3f\t%-6s %-6s\n" % (
+                float(tokens[1]),
+                float(tokens[2]),
+                float(tokens[3])+refdist-dist,
+                float(tokens[4]),float(tokens[5]),float(tokens[6]),
+                float(tokens[7]),float(tokens[8])))
+        elif tokens[0]=='ANIM_trans' and float(tokens[3])<-cut:
+            outfile.write("%sANIM_trans\t%9.4f %9.4f %9.4f\t%9.4f %9.4f %9.4f\t%s" % (
+                line.split('A')[0],
+                float(tokens[1]),
+                float(tokens[2]),
+                float(tokens[3])+refdist-dist,
+                float(tokens[4]),
+                float(tokens[5]),
+                float(tokens[6])+refdist-dist,
+                line.split(None,7)[-1]))
+        else:
+            outfile.write(line)
+
+    outfile.close()
+    infile.close()
+
 for thing in ['Safedock2S', 'Safegate']:
     for dist in [16, 18, 20, 22, 24, 26, 28, 30]:
         for height in [3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8]:
