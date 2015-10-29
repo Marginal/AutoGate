@@ -49,11 +49,11 @@ for thing in ['Safedock2S', 'Safegate']:
 refdist=20
 
 thing = 'Marshaller'
-for dist in [16, 18, 20, 22, 24, 26, 28, 30]:
+for dist in range(10,31,2):
     if dist==refdist: continue
-    infilename = "Standalone-%s/SA-%sm-%s.obj" % (thing, refdist, thing)
+    infilename = "Standalone-%s/SA-%02dm-%s.obj" % (thing, refdist, thing)
     infile=file(infilename, 'rt')
-    outfilename = "Standalone-%s/SA-%sm-%s.obj" % (thing, dist, thing)
+    outfilename = "Standalone-%s/SA-%02dm-%s.obj" % (thing, dist, thing)
     outfile=file(outfilename, 'wt')
     print outfilename
 
