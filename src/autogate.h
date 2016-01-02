@@ -62,7 +62,8 @@ static const float REM_Z = 12;	/* Distance remaining */
 
 /* Permissable distance [m] of DGS from gate origin */
 static const float DGS_X = 10;
-static const float DGS_Z =-30;	/* (6-50 in Safedock2 flier) */
+static const float DGS_Z =-50;		/* s2.2 of Safedock Manual says 50m from nose */
+static const float DGS_H = 0.2f;	/* ~11 degrees. s2.3 of Safedock Manual says 9 or 12 degrees */
 
 static const float WAITTIME=1;	/* Time to wait before engaging */
 static const float DURATION=15;	/* Time to engage/disengage */

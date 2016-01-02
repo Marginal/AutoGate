@@ -441,17 +441,27 @@ static int getdgs(void)
         /* Haven't yet identified the active dgs */
         float x, z;
         float gate_hcos, gate_hsin;
-		
-        /* Location of this dgs in the active gate's space */
-        gate_hcos = cosf(gate_h);
-        gate_hsin = sinf(gate_h);
-        x=gate_hcos*(object_x-gate_x) + gate_hsin*(object_z-gate_z);
-        z=gate_hcos*(object_z-gate_z) - gate_hsin*(object_x-gate_x);
-        if (fabsf(x)<=DGS_X && z<=0 && z>=DGS_Z)
+
+        float object_h = XPLMGetDataf(ref_draw_object_psi) * D2R;
+
+        /* Check DGS is pointing in the same direction as the gate, and within desired radius */
+        if (fabsf(object_h - gate_h) <= DGS_H &&
+            ((object_x-gate_x) * (object_x-gate_x) + (object_z-gate_z) * (object_z-gate_z)) <= (DGS_Z * DGS_Z))
         {
-            dgs_x=object_x;
-            dgs_y=object_y;
-            dgs_z=object_z;
+            /* Location of this DGS in the active gate's space */
+            gate_hcos = cosf(gate_h);
+            gate_hsin = sinf(gate_h);
+            x = gate_hcos*(object_x-gate_x) + gate_hsin*(object_z-gate_z);
+            z = gate_hcos*(object_z-gate_z) - gate_hsin*(object_x-gate_x);
+
+            if (fabsf(x)<=DGS_X && z<=0 && z>=DGS_Z)
+            {
+                dgs_x=object_x;
+                dgs_y=object_y;
+                dgs_z=object_z;
+            }
+            else
+                return 0;
         }
         else
             return 0;
