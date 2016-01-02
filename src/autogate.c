@@ -50,6 +50,7 @@ static float azimuth, distance, distance2;
 static float last_x, last_y, last_z;		/* last object examined */
 static float last_update=0;			/* and the time we examined it */
 float gate_x, gate_y, gate_z, gate_h;		/* active gate */
+static float gate_update=0;			/* and the time we examined it */
 int gate_autogate;				/* active gate is an AutoGate, not a standalone dummy */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
 
@@ -68,7 +69,7 @@ static float getdgsfloat(XPLMDataRef);
 static int getdgsint(XPLMDataRef);
 static int getdgsicao(XPLMDataRef, int*, int, int);
 
-static void localpos(float, float, float, float, float *, float *, float *);
+static int localpos(float, float, float, float, float *, float *, float *);
 static void updaterefs(float, float, float, float);
 
 #ifdef DEBUG
@@ -322,9 +323,10 @@ static void newplane(void)
 static void resetidle(void)
 {
     state=IDLE;
-    gate_x=gate_y=gate_z=gate_h=0;
+    gate_x=gate_y=gate_z=gate_h=gate_update=0;
     gate_autogate=0;
     dgs_x=dgs_y=dgs_z=0;
+    last_x=last_y=last_z=last_update=0;
     vert=lat=moving=0;
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -333,20 +335,36 @@ static void resetidle(void)
 
 static float getgatefloat(XPLMDataRef inRefcon)
 {
-    float now, object_x, object_y, object_z, object_h;
+    float now;
+    float plane_x, plane_z;
+    float object_x, object_y, object_z, object_h;
     float local_x, local_y, local_z;
 	
-    now=XPLMGetDataf(ref_total_running_time_sec);
-    object_x=XPLMGetDataf(ref_draw_object_x);
-    object_y=XPLMGetDataf(ref_draw_object_y);
-    object_z=XPLMGetDataf(ref_draw_object_z);
+    now = XPLMGetDataf(ref_total_running_time_sec);
+    object_x = XPLMGetDataf(ref_draw_object_x);
+    object_y = XPLMGetDataf(ref_draw_object_y);
+    object_z = XPLMGetDataf(ref_draw_object_z);
+
+    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+    {
+        /* Same frame and object as last calculation */
+        return (gate_x==object_x && gate_y==object_y && gate_z==object_z) ? *(float*)inRefcon : 0;
+    }
+    else
+    {
+        last_update = now;
+        last_x = object_x;
+        last_y = object_y;
+        last_z = object_z;
+    }
+
     if (state>IDLE && (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z))
     {
         /* We're tracking and it's not by this gate */
-        if (now-last_update > POLLTIME)
+
+        if (now-gate_update > POLLTIME)
         {
             /* We haven't seen our gate in a while - check we're still in range in case we've been moved across the airport */
-            last_update = now-0.0001f;
             localpos(gate_x, gate_y, gate_z, gate_h, &local_x, &local_y, &local_z);
             if (fabsf(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
                 resetidle();	/* Just gone out of range of the tracking gate */
@@ -357,35 +375,31 @@ static float getgatefloat(XPLMDataRef inRefcon)
         return 0;
     }
 
-    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
-        /* Same rendering pass and object as last calculation */
-        return *(float*)inRefcon;
-    else
-    {
-        last_update=now;
-        last_x=object_x;
-        last_y=object_y;
-        last_z=object_z;
-    }
-
+    plane_x=XPLMGetDataf(ref_plane_x);
+    plane_z=XPLMGetDataf(ref_plane_z);
     object_h=XPLMGetDataf(ref_draw_object_psi) * D2R;
-    localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);
 
-    if (fabsf(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
+    if (((object_x-plane_x) * (object_x-plane_x) + (object_z-plane_z) * (object_z-plane_z)) > (CAP_Z * CAP_Z) ||
+        localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z) ||
+        fabsf(local_x)>CAP_X || local_z<DGS_Z || local_z>CAP_Z)
     {
         /* Not in range of this gate */
+
         if (gate_x==object_x && gate_y==object_y && gate_z==object_z)
             resetidle();	/* Just gone out of range of the tracking gate */
 
-        else if (state == NEWPLANE)
+        if (state == NEWPLANE)
             XPLMSetFlightLoopCallbackInterval(newplanecallback, -1, 1, NULL);	/* Reset newplane state before next frame */
 
         return 0;
     }
-	    
+
+    /* In range of this gate */
+
     if (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z)
     {
         /* Just come into range */
+
         if (state == NEWPLANE && fabsf(local_z) < NEW_Z)
         {
             /* Fudge plane's position to line up with this gate */
@@ -394,8 +408,8 @@ static float getgatefloat(XPLMDataRef inRefcon)
 
             object_hcos = cosf(object_h);
             object_hsin = sinf(object_h);
-            XPLMSetDataf(ref_plane_x, XPLMGetDataf(ref_plane_x) + local_z * object_hsin - local_x * object_hcos);
-            XPLMSetDataf(ref_plane_z, XPLMGetDataf(ref_plane_z) - local_z * object_hcos - local_x * object_hsin);
+            XPLMSetDataf(ref_plane_x, plane_x + local_z * object_hsin - local_x * object_hcos);
+            XPLMSetDataf(ref_plane_z, plane_z - local_z * object_hcos - local_x * object_hsin);
             localpos(object_x, object_y, object_z, object_h, &local_x, &local_y, &local_z);	/* recalc */
 
             XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
@@ -415,11 +429,12 @@ static float getgatefloat(XPLMDataRef inRefcon)
         gate_y=object_y;
         gate_z=object_z;
         gate_h=object_h;
+
+        if ((float*)inRefcon == &lat)	/* Standalone DGS dummy gate only uses vert */
+            gate_autogate = -1;		/* Relies on lat occurring in the .obj file before vert */
     }
 
-    if ((float*)inRefcon == &lat)
-        gate_autogate = -1;	/* Standalone DGS dummy gate only uses vert */
-
+    gate_update = now;
     updaterefs(now, local_x, local_y, local_z);
     return *(float*)inRefcon;
 }
@@ -432,9 +447,23 @@ static int getdgs(void)
 
     if (state <= IDLE) return 0;	/* Only interested in DGSs if we're in range of a gate */
 
-    object_x=XPLMGetDataf(ref_draw_object_x);
-    object_y=XPLMGetDataf(ref_draw_object_y);
-    object_z=XPLMGetDataf(ref_draw_object_z);
+    now = XPLMGetDataf(ref_total_running_time_sec);
+    object_x = XPLMGetDataf(ref_draw_object_x);
+    object_y = XPLMGetDataf(ref_draw_object_y);
+    object_z = XPLMGetDataf(ref_draw_object_z);
+
+    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+    {
+        /* Same frame and object as last calculation */
+        return (dgs_x==object_x && dgs_y==object_y && dgs_z==object_z);
+    }
+    else
+    {
+        last_update = now;
+        last_x = object_x;
+        last_y = object_y;
+        last_z = object_z;
+    }
 
     if (!(dgs_x || dgs_y || dgs_z))
     {
@@ -470,18 +499,6 @@ static int getdgs(void)
         /*  Have identified the active dgs and this isn't it */
         return 0;
 
-    now=XPLMGetDataf(ref_total_running_time_sec);
-    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
-        /* Same rendering pass and object as last calculation */
-        return -1;
-    else
-    {
-        last_update=now;
-        last_x=object_x;
-        last_y=object_y;
-        last_z=object_z;
-    }
-	
     /* Re-calculate plane location - can't rely on values from getgate() since that will not be being called if gate no longer in view */
     localpos(gate_x, gate_y, gate_z, gate_h, &local_x, &local_y, &local_z);
 
@@ -522,7 +539,7 @@ static int getdgsicao(XPLMDataRef inRefcon, int *outValues, int inOffset, int in
 
 
 /* Calculate location of plane's centreline opposite door in this object's space */
-static void localpos(float object_x, float object_y, float object_z, float object_h, float *local_x, float *local_y, float *local_z)
+static int localpos(float object_x, float object_y, float object_z, float object_h, float *local_x, float *local_y, float *local_z)
 {
     float plane_x, plane_y, plane_z, plane_h;
     float x, y, z;
@@ -545,6 +562,8 @@ static void localpos(float object_x, float object_y, float object_z, float objec
     *local_x=object_hcos*(x-object_x)+object_hsin*(z-object_z);
     *local_y=y-object_y;
     *local_z=object_hcos*(z-object_z)-object_hsin*(x-object_x);
+
+    return 0;	/* Return value has no meaning */
 }
 
 
