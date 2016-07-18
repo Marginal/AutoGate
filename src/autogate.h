@@ -21,6 +21,7 @@
 
 #ifdef _MSC_VER
 #  define PATH_MAX MAX_PATH
+#  define strcasecmp(s1, s2) _stricmp(s1, s2)
 #endif
 
 #if APL
@@ -82,6 +83,7 @@ float alertcallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFl
 void closesound();
 void playalert();
 void stopalert();
+void posixify(char *path);
 
 extern float gate_x, gate_y, gate_z, gate_h;		/* active gate */
 extern float lat, vert, moving;

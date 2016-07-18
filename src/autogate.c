@@ -168,9 +168,24 @@ static char canonical[16][5] = {
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
+    char buffer[PATH_MAX], *c;
+
     sprintf(outName, "%s v%.2f", pluginName, VERSION);
     strcpy(outSig,  pluginSig);
     strcpy(outDesc, pluginDesc);
+
+    /* Refuse to initialise if Fat plugin has been moved out of its folder */
+    XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
+    XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
+    posixify(buffer);
+    if ((c = strrchr(buffer, '/'))) *c = '\0';	/* strip file from path */
+    if (!c ||
+        !(c = strrchr(buffer, '/')) ||
+        !strcasecmp(c, "/plugins"))
+    {
+        XPLMDebugString("AutoGate: Can't initialise - plugin has been moved out of its folder!\n");
+        return 0;
+    }
 
     /* Datarefs */
     ref_plane_x        =XPLMFindDataRef("sim/flightmodel/position/local_x");
@@ -215,7 +230,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 #ifdef DEBUG
     windowId = XPLMCreateWindow(10, 750, 310, 610, 1, drawdebug, NULL, NULL, NULL);
 #endif
-    XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
     XPLMRegisterFlightLoopCallback(initsoundcallback, -1, NULL);	/* Deferred initialisation */
     XPLMRegisterFlightLoopCallback(alertcallback, 0, NULL);
     XPLMRegisterFlightLoopCallback(newplanecallback, 0, NULL);		/* For checking gate alignment on new location */

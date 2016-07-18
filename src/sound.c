@@ -204,7 +204,7 @@ ALuint load_wave(const char *file_name)
 
 
 /* Convert path to posix style in-place */
-static void posixify(char *path)
+void posixify(char *path)
 {
 #if APL
     if (*path!='/')
