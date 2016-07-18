@@ -47,11 +47,14 @@ static int icao[4];
 static float azimuth, distance, distance2;
 
 /* Internal state */
-static float last_x, last_y, last_z;		/* last object examined */
-static float last_update=0;			/* and the time we examined it */
+static float last_gate_x, last_gate_y, last_gate_z;	/* last gate object examined */
+static float last_gate_update = 0;		/* and the time we examined it */
 float gate_x, gate_y, gate_z, gate_h;		/* active gate */
 static float gate_update=0;			/* and the time we examined it */
 int gate_autogate;				/* active gate is an AutoGate, not a standalone dummy */
+
+static float last_dgs_x, last_dgs_y, last_dgs_z;	/* last dgs object examined */
+static float last_dgs_update = 0;		/* and the time we examined it */
 static float dgs_x, dgs_y, dgs_z;		/* active DGS */
 
 
@@ -326,7 +329,8 @@ static void resetidle(void)
     gate_x=gate_y=gate_z=gate_h=gate_update=0;
     gate_autogate=0;
     dgs_x=dgs_y=dgs_z=0;
-    last_x=last_y=last_z=last_update=0;
+    last_gate_x = last_gate_y = last_gate_z = last_gate_update = 0;
+    last_dgs_x = last_dgs_y = last_dgs_z = last_dgs_update = 0;
     vert=lat=moving=0;
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -345,17 +349,17 @@ static float getgatefloat(XPLMDataRef inRefcon)
     object_y = XPLMGetDataf(ref_draw_object_y);
     object_z = XPLMGetDataf(ref_draw_object_z);
 
-    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+    if (last_gate_update==now && last_gate_x==object_x && last_gate_y==object_y && last_gate_z==object_z)
     {
         /* Same frame and object as last calculation */
         return (gate_x==object_x && gate_y==object_y && gate_z==object_z) ? *(float*)inRefcon : 0;
     }
     else
     {
-        last_update = now;
-        last_x = object_x;
-        last_y = object_y;
-        last_z = object_z;
+        last_gate_update = now;
+        last_gate_x = object_x;
+        last_gate_y = object_y;
+        last_gate_z = object_z;
     }
 
     if (state>IDLE && (gate_x!=object_x || gate_y!=object_y || gate_z!=object_z))
@@ -452,17 +456,17 @@ static int getdgs(void)
     object_y = XPLMGetDataf(ref_draw_object_y);
     object_z = XPLMGetDataf(ref_draw_object_z);
 
-    if (last_update==now && last_x==object_x && last_y==object_y && last_z==object_z)
+    if (last_dgs_update==now && last_dgs_x==object_x && last_dgs_y==object_y && last_dgs_z==object_z)
     {
         /* Same frame and object as last calculation */
         return (dgs_x==object_x && dgs_y==object_y && dgs_z==object_z);
     }
     else
     {
-        last_update = now;
-        last_x = object_x;
-        last_y = object_y;
-        last_z = object_z;
+        last_dgs_update = now;
+        last_dgs_x = object_x;
+        last_dgs_y = object_y;
+        last_dgs_z = object_z;
     }
 
     if (!(dgs_x || dgs_y || dgs_z))
