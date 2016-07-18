@@ -213,7 +213,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     ref_distance2=floatref("marginal.org.uk/dgs/distance2", getdgsfloat, &distance2);
 
 #ifdef DEBUG
-    windowId = XPLMCreateWindow(10, 750, 310, 640, 1, drawdebug, NULL, NULL, NULL);
+    windowId = XPLMCreateWindow(10, 750, 310, 610, 1, drawdebug, NULL, NULL, NULL);
 #endif
     XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
     XPLMRegisterFlightLoopCallback(initsoundcallback, -1, NULL);	/* Deferred initialisation */
@@ -778,7 +778,8 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     XPLMGetWindowGeometry(inWindowID, &left, &top, &right, &bottom);
     XPLMDrawTranslucentDarkBox(left, top, right, bottom);
 
-    sprintf(buf, "State: %d %d %d", state, plane_type, running);
+    char *statestr[] = { "Disabled", "NewPlane", "Idle", "IDFail", "Track", "Good", "Bad", "Engage", "Docked", "Disengage", "Disengaged" };
+    sprintf(buf, "State: %s %s %s", statestr[state], plane_type==15 ? "Unknown" : canonical[plane_type], running ? "Running" : "Parked");
     XPLMDrawString(color, left + 5, top - 10, buf, 0, xplmFont_Basic);
     sprintf(buf, "Door : %10.3f %10.3f %10.3f",       XPLMGetDataf(ref_acf_door_x), XPLMGetDataf(ref_acf_door_y), XPLMGetDataf(ref_acf_door_z));
     XPLMDrawString(color, left + 5, top - 30, buf, 0, xplmFont_Basic);
@@ -790,13 +791,15 @@ static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
     XPLMDrawString(color, left + 5, top - 60, buf, 0, xplmFont_Basic);
     sprintf(buf, "Time : %10.3f", timestamp);
     XPLMDrawString(color, left + 5, top - 70, buf, 0, xplmFont_Basic);
-    sprintf(buf, "Data : %1d %6.3f %6.3f %1d %1d %4.1f %4.1f %4.1f", status, lat, vert, lr, track, azimuth, distance, distance2);
-    XPLMDrawString(color, left + 5, top - 80, buf, 0, xplmFont_Basic);
-    sprintf(buf, "ID   : %1d %1d %1d %1d %2x %c%c%c%c", id1, id2, id3, id4, icao[0], icao[0], icao[1], icao[2], icao[3]);
+    sprintf(buf, "ID   : %1d %1d %1d %1d %c%c%c%c", id1, id2, id3, id4, icao[0], icao[1], icao[2], icao[3]);
     XPLMDrawString(color, left + 5, top - 90, buf, 0, xplmFont_Basic);
+    sprintf(buf, "Gate : lat=%6.3f vert=%6.3f moving=%1.0f", lat, vert, moving);
+    XPLMDrawString(color, left + 5, top -100, buf, 0, xplmFont_Basic);
+    sprintf(buf, "DGS  : status=%1d track=%1d lr=%1d %4.1f %4.1f %4.1f", status, track, lr, azimuth, distance, distance2);
+    XPLMDrawString(color, left + 5, top -110, buf, 0, xplmFont_Basic);
     alGetSourcefv(snd_src, AL_POSITION, pos);
     alGetSourcefv(snd_src, AL_GAIN, &gain);
     sprintf(buf, "Sound: %10.3f %10.3f %10.3f %6.2f", pos[0], pos[1], pos[2], gain);
-    XPLMDrawString(color, left + 5, top -100, buf, 0, xplmFont_Basic);
+    XPLMDrawString(color, left + 5, top -130, buf, 0, xplmFont_Basic);
 }				    
 #endif
