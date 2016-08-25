@@ -178,10 +178,18 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);			/* Get paths in posix format under X-Plane 10+ */
     XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
     posixify(buffer);
-    if ((c = strrchr(buffer, '/'))) *c = '\0';	/* strip file from path */
+    if ((c = strrchr(buffer, '/')))
+    {
+        if (!strcmp(c-3, "/32") || !strcmp(c-3, "/64"))
+            *(c-3) = '\0';		/* plugins one level down on some builds, so go up */
+        else
+            *c = '\0';			/* strip .xpl file */
+        if ((c = strrchr(buffer, '/')))
+            *c = '\0';			/* strip Fat plugin folder */
+    }
     if (!c ||
         !(c = strrchr(buffer, '/')) ||
-        !strcasecmp(c, "/plugins"))
+        strcasecmp(c, "/plugins"))
     {
         XPLMDebugString("AutoGate: Can't initialise - plugin has been moved out of its folder!\n");
         return 0;
