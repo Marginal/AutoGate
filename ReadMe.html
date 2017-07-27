@@ -219,13 +219,29 @@ kbd {font-family: sans-serif; color: black; background-color: white; border: 1px
 <p>Similarly, various static DGS objects are supplied in this kit's <code>DGSs-Safegate</code>, <code>DGSs-Safedock2S</code>, <code>DGSs-SafedockT2</code> and <code>DGSs-Marshaller</code> folders that can be used when a static aircraft is parked at a gate.</p>
 <p>You don't need to distribute all of these objects with your scenery package - only the ones that you use.</p>
 
-<h3>Customisation</h3>
+<h3><a id="customisation">Customisation</h3>
 
 <h4>Jetways</h4>
 
 <p>The static and animated glass and steel jetway objects share common texture files <code>AutoGate2.dds</code> and <code>AutoGate2_LIT.dds</code> in the <code>Jetways-Glass</code> and <code>Jetways-Steel</code> folders. You can edit or replace these files in your scenery package folder. These files  are very modestly sized; consider doubling their size if you want to add more detail. The file <code>PaintKit.png</code> in the <code>Helpers</code> folder describes how the textures in these files map to the jetway objects.</p>
 <p>You can edit the object files in a text editor to change the name of the texture files specified in the <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_lttex_file_namegt" target="_blank">TEXTURE<a></code> and <code><a href="http://developer.x-plane.com/?article=obj8-file-format-specification#TEXTURE_LIT_lttex_file_namegt" target="_blank">TEXTURE_LIT<a></code> statements, and save the object with a different filename. This allows you to have a mix of differently textured jetways. <small>(Note that the spacing rules described above still apply irrespective of the objects' filenames)</small>.</p>
-<p>The static, animated and extension/connector glass jetways are drawn in &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ATTR_layer_group_ltnamegt_ltoffsetgt" target="_blank">layer group</a>&rdquo; objects+4, objects+3 and objects+2 respectively, so that other scenery objects (which are normally drawn in layer group objects+0) can be viewed through the glass windows. If you have a number of glass objects at a gate you may need to change the <code>ATTR_layer_group objects <i>n</i></code> statements in some of the object files to change their relative drawing order; <i>i.e.</i> so that objects further from the terminal building are drawn later than objects closer to the terminal building.</p>
+<p>The static, animated and extension/connector glass jetways are drawn in &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ATTR_layer_group_ltnamegt_ltoffsetgt" target="_blank">layer group</a>&rdquo; <code>objects+4</code>, <code>objects+3</code> and <code>objects+2</code> respectively, so that other scenery objects (which are normally drawn in layer group <code>objects+0</code>) can be viewed through the glass windows. If you have a number of glass objects at a gate you may need to change the <code>ATTR_layer_group objects <i>n</i></code> statements in some of the object files to change their relative drawing order; <i>i.e.</i> so that objects further from the terminal building are drawn later than objects closer to the terminal building.</p>
+
+<h4>Custom Jetway models</h4>
+
+<p>You can use your own animated jetway objects instead of or in addition to the supplied objects. Your objects must be modelled to conform to the following constraints:</p>
+<ul>
+  <li>Passengers stepping off the jetway onto the aircraft would be walking in the direction of the x axis - <i>i.e.</i> imagine the aircraft to be parked pointing along the y axis in your 3D modelling app.</li>
+  <li>When the jetway is idle, the centre of the leading edge of the floor of the entrance must be at -7.5m on the x axis, 0m on the y axis, and +4.0m on the z (vertical) axis in your 3D modelling app.</li>
+  <li>The entrance must be animated to rise vertically by 1m when the DataRef <code>marginal.org.uk/autogate/vert</code> value increases by 1.0, and fall by 1m when the DataRef value decreases by 1.0.</li>
+  <li>The entrance must be animated to move +1m towards the aircraft along the x axis when the DataRef <code>marginal.org.uk/autogate/lat</code> value increases by 1.0.</li>
+  <li>The rest of your jetway must be animated to smoothly follow the movements of the entrance.</li>
+  <li>The DataRef <code>marginal.org.uk/autogate/moving</code> has value 1.0 while the jetway is moving, otherwise 0.0. You can use this to display an animation while the jetway is moving - <i>e.g.</i> the supplied jetway objects use this DataRef in an &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ANIM_hide_ltv1gt_ltv2gt_ltdatarefgt" target="_blank">ANIM_hide</a>&rdquo; statement to display an <code>airplane_beacon</code> &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#LIGHT_NAMED_ltnamegt_ltxgt_ltygt_ltzgt" target="_blank">named light</a>&rdquo; while the jetway is moving.</li>
+  <li>Jetways that contain transparency should be drawn in &ldquo;<a href="http://developer.x-plane.com/?article=obj8-file-format-specification#ATTR_layer_group_ltnamegt_ltoffsetgt" target="_blank">layer group</a>&rdquo; <code>objects+1</code> or later so that other scenery objects (which are normally drawn in layer group <code>objects+0</code>) can be viewed through the glass windows.</li>
+  <li>Consider including a static lower level-of-detail version of the jetway in your model, visible from distances greater than <i>e.g.</i> 1000m.</li>
+</ul>
+
+<p>You can use the Blender 2.4 models for the jetways supplied in this kit as an example or starting point - they are available as<code>.blend</code> files <a href="https://github.com/Marginal/AutoGate/tree/master/Jetways-Glass" target="_blank">here</a>.
 
 <h4>Docking Guidance Systems</h4>
 
