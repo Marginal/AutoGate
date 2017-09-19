@@ -165,6 +165,16 @@ static char canonical[16][5] = {
     "APRH",
 };
 
+/* Autogate X-Plane Menu*/
+
+int g_menu_container_idx; // The index of our menu item in the Plugins menu
+int g_automenu;
+int g_menu_connect;
+int g_automaticBehavior;
+XPLMMenuID g_menu_id; // The menu container we'll append all our menu items to
+
+XPLMCommandRef ToggleConnectionCmd = NULL;	//  Our two custom commands
+XPLMCommandRef AutomaticAutoGateCmd = NULL;
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
@@ -241,6 +251,34 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     XPLMRegisterFlightLoopCallback(initsoundcallback, -1, NULL);	/* Deferred initialisation */
     XPLMRegisterFlightLoopCallback(alertcallback, 0, NULL);
     XPLMRegisterFlightLoopCallback(newplanecallback, 0, NULL);		/* For checking gate alignment on new location */
+
+    /* Add menu */
+
+	g_menu_container_idx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "AutoGate", 0, 0);
+	g_menu_id = XPLMCreateMenu("AutoGate", XPLMFindPluginsMenu(), g_menu_container_idx, menu_handler, NULL);
+	g_menu_connect = XPLMAppendMenuItem(g_menu_id, "Connect/Disconnect Gate", (void *)"Menu Item 1", 1);
+	XPLMAppendMenuSeparator(g_menu_id);
+	g_automenu = XPLMAppendMenuItem(g_menu_id, "Automatic Autogate", (void *)"Menu Item 2", 1);
+
+	// load previous state
+	load_settings_from_file();
+	XPLMMenuCheck check = xplm_Menu_Checked;
+	int enableCon = 0;
+	if (!g_automaticBehavior)
+	{
+		check = xplm_Menu_Unchecked;
+		enableCon = 1;
+	}
+	
+	XPLMCheckMenuItem(g_menu_id, g_automenu, check);
+	XPLMEnableMenuItem(g_menu_id, g_menu_connect, enableCon);
+	
+
+	AutomaticAutoGateCmd = XPLMCreateCommand("AutoGate/toggle_automatic", "Toggle automatic behavior");
+	ToggleConnectionCmd = XPLMCreateCommand("AutoGate/connect_disconnect", "Connect/Disconnect jetway");
+
+	XPLMRegisterCommandHandler(AutomaticAutoGateCmd, automatic_behavior_handler, 1, NULL);
+	XPLMRegisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL);
 
     return 1;
 }
@@ -596,168 +634,174 @@ static int localpos(float object_x, float object_y, float object_z, float object
 /* Update published data used by gate and dgs */
 static void updaterefs(float now, float local_x, float local_y, float local_z)
 {
-    int running;
-    int locgood=(fabsf(local_x)<=AZI_X && fabsf(local_z)<=GOOD_Z);
-	
-    XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
-    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5f);
+	int running;
+	int pbrake;
+	int locgood = (fabsf(local_x) <= AZI_X && fabsf(local_z) <= GOOD_Z);
 
-    status=id1=id2=id3=id4=lr=track=0;
-    azimuth=distance=distance2=0;
+	XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
+	pbrake = (XPLMGetDataf(ref_parkingbrake) < 0.5f);
+	if (g_automaticBehavior)
+		running |= pbrake;
 
-    switch (state)
-    {
-    case IDFAIL:
-        lr=3;	/* Stop */
-        status=5;
-        break;
+	status = id1 = id2 = id3 = id4 = lr = track = 0;
+	azimuth = distance = distance2 = 0;
 
-    case TRACK:
-        if (locgood)
-        {
-            state=GOOD;
-            timestamp=now;
-        }
-        else if (local_z<-GOOD_Z)
-            state=BAD;
-        else
-        {
-            status=1;	/* plane id */
-            if (plane_type<4)
-                id1=plane_type+1;
-            else if (plane_type<8)
-                id2=plane_type-3;
-            else if (plane_type<12)
-                id3=plane_type-7;
-            else
-                id4=plane_type-11;
-            if (local_z-GOOD_Z > AZI_Z ||
-                fabsf(local_x) > AZI_X)
-                track=1;	/* lead-in only */
-            else
-            {
-                distance=((float)((int)((local_z - GOOD_Z)*2))) / 2;
-                azimuth=((float)((int)(local_x*2))) / 2;
-                if (azimuth>4)	azimuth=4;
-                if (azimuth<-4) azimuth=-4;
-                if (azimuth<=-0.5f)
-                    lr=1;
-                else if (azimuth>=0.5f)
-                    lr=2;
-                else
-                    lr=0;
-                if (local_z-GOOD_Z <= REM_Z/2)
-                {
-                    track=3;
-                    distance2=distance;
-                }
-                else
-                {
-                    if (local_z-GOOD_Z > REM_Z)
-                        /* azimuth only */
-                        distance=REM_Z;
-                    track=2;
-                    distance2=distance - REM_Z/2;
-                }
-            }
-        }
-        break;
+	switch (state)
+	{
+	case IDFAIL:
+		lr = 3;	/* Stop */
+		status = 5;
+		break;
 
-    case GOOD:
-        if (!locgood)
-            state=TRACK;
-        else if (running)
-        {
-            /* Stop */
-            lr=3;
-            status=2;
-        }
-        else
-        {
-            state=ENGAGE;
-            timestamp=now;
-        }
-        break;
+	case TRACK:
+		if (locgood)
+		{
+			state = GOOD;
+			timestamp = now;
+		}
+		else if (local_z<-GOOD_Z)
+			state = BAD;
+		else
+		{
+			status = 1;	/* plane id */
+			if (plane_type<4)
+				id1 = plane_type + 1;
+			else if (plane_type<8)
+				id2 = plane_type - 3;
+			else if (plane_type<12)
+				id3 = plane_type - 7;
+			else
+				id4 = plane_type - 11;
+			if (local_z - GOOD_Z > AZI_Z ||
+				fabsf(local_x) > AZI_X)
+				track = 1;	/* lead-in only */
+			else
+			{
+				distance = ((float)((int)((local_z - GOOD_Z) * 2))) / 2;
+				azimuth = ((float)((int)(local_x * 2))) / 2;
+				if (azimuth>4)	azimuth = 4;
+				if (azimuth<-4) azimuth = -4;
+				if (azimuth <= -0.5f)
+					lr = 1;
+				else if (azimuth >= 0.5f)
+					lr = 2;
+				else
+					lr = 0;
+				if (local_z - GOOD_Z <= REM_Z / 2)
+				{
+					track = 3;
+					distance2 = distance;
+				}
+				else
+				{
+					if (local_z - GOOD_Z > REM_Z)
+						/* azimuth only */
+						distance = REM_Z;
+					track = 2;
+					distance2 = distance - REM_Z / 2;
+				}
+			}
+		}
+		break;
 
-    case BAD:
-        if (local_z>=-GOOD_Z)
-            state=TRACK;
-        else
-        {
-            /* Too far */
-            lr=3;
-            status=4;
-        }
-        break;
+	case GOOD:
+		if (!locgood)
+			state = TRACK;
+		else if (running)
+		{
+			/* Stop */
+			lr = 3;
+			status = 2;
+		}
+		else
+		{
+			if (g_automaticBehavior)
+			{
+				state = ENGAGE;
+				timestamp = now;
+			}
+		}
+		break;
 
-    case ENGAGE:
-        lr=3;
-        if (running)
-        {
-            /* abort - reverse animation */
-            state=DISENGAGE;
-            timestamp=now-(timestamp+WAITTIME+DURATION-now);
-        }
-        else if (now>timestamp+WAITTIME+DURATION)
-            state=DOCKED;
-        else if (now>timestamp+WAITTIME)
-        {
-            float ratio=(now-(timestamp+WAITTIME))/DURATION;
-            status=3;	/* OK */
-            lat =(door_x-OBJ_X) * ratio;
-            vert=(local_y-OBJ_Y) * ratio;
-            if (!moving && gate_autogate) playalert();
-            moving=1;
-        }
-        else
-            status=2;	/* Stop */
-        break;
+	case BAD:
+		if (local_z >= -GOOD_Z)
+			state = TRACK;
+		else
+		{
+			/* Too far */
+			lr = 3;
+			status = 4;
+		}
+		break;
 
-    case DOCKED:
-        /* Blank */
-        if (running)
-        {
-            state=DISENGAGE;
-            timestamp=now;
-        }
-        else
-        {
-            lat =door_x-OBJ_X;
-            vert=local_y-OBJ_Y;
-            moving=0;
-            stopalert();
-        }
-        break;
+	case ENGAGE:
+		lr = 3;
+		if (running)
+		{
+			/* abort - reverse animation */
+			state = DISENGAGE;
+			timestamp = now - (timestamp + WAITTIME + DURATION - now);
+		}
+		else if (now>timestamp + WAITTIME + DURATION)
+			state = DOCKED;
+		else if (now>timestamp + WAITTIME)
+		{
+			float ratio = (now - (timestamp + WAITTIME)) / DURATION;
+			status = 3;	/* OK */
+			lat = (door_x - OBJ_X) * ratio;
+			vert = (local_y - OBJ_Y) * ratio;
+			if (!moving && gate_autogate) playalert();
+			moving = 1;
+		}
+		else
+			status = 2;	/* Stop */
+		break;
 
-    case DISENGAGE:
-        /* Blank */
-        if (now>timestamp+DURATION)
-        {
-            state=DISENGAGED;
-            lat=vert=moving=0;
-            stopalert();
-        }
-        else
-        {
-            float ratio=1 - (now-timestamp)/DURATION;
-            lat =(door_x-OBJ_X) * ratio;
-            vert=(local_y-OBJ_Y) * ratio;
-            if (!moving && gate_autogate) playalert();
-            moving=1;
-        }
-        break;
+	case DOCKED:
+		/* Blank */
+		if (running)
+		{
+			state = DISENGAGE;
+			timestamp = now;
+		}
+		else
+		{
+			lat = door_x - OBJ_X;
+			vert = local_y - OBJ_Y;
+			moving = 0;
+			stopalert();
+		}
+		break;
 
-    case DISENGAGED:
-        /* Blank */
-        if (local_z-GOOD_Z > AZI_Z || fabsf(local_x) > AZI_X)
-            /* Go back to lead-in */
-            state=TRACK;
-        break;
+	case DISENGAGE:
+		/* Blank */
+		if (now>timestamp + DURATION)
+		{
+			state = DISENGAGED;
+			lat = vert = moving = 0;
+			stopalert();
+		}
+		else
+		{
+			float ratio = 1 - (now - timestamp) / DURATION;
+			lat = (door_x - OBJ_X) * ratio;
+			vert = (local_y - OBJ_Y) * ratio;
+			if (!moving && gate_autogate) playalert();
+			moving = 1;
+		}
+		break;
 
-    default:
-        /* Shouldn't be here if state<=IDLE */
-        assert(0);
-    }
+	case DISENGAGED:
+		/* Blank */
+		if (local_z - GOOD_Z > AZI_Z || fabsf(local_x) > AZI_X)
+			/* Go back to lead-in */
+			state = TRACK;
+		break;
+
+	default:
+		/* Shouldn't be here if state<=IDLE */
+		assert(0);
+	}
 }
 
 static XPLMDataRef floatref(char *inDataName, XPLMGetDataf_f inReadFloat, float *inRefcon)
@@ -785,6 +829,125 @@ int xplog(char *msg)
     return 0;
 }
 
+void menu_handler(void * in_menu_ref, void * in_item_ref)
+{
+	if (!strcmp((const char *)in_item_ref, "Menu Item 1"))
+	{
+		process_connection();
+	}
+	else if (!strcmp((const char *)in_item_ref, "Menu Item 2"))
+	{
+		process_automatic_behavior();
+	}
+}
+
+void process_connection()
+{
+	if (g_automaticBehavior)
+		return;
+
+	// do stuff
+	float now = XPLMGetDataf(ref_total_running_time_sec);
+	if (state == GOOD || state == DISENGAGED)
+	{
+
+		timestamp = now;
+		state = ENGAGE;
+	}
+	else if (state == DOCKED)
+	{
+		timestamp = now;
+		state = DISENGAGE;
+	}
+	// TODO: ADD Message box 
+}
+
+void process_automatic_behavior()
+{
+	XPLMMenuCheck state;
+	XPLMCheckMenuItemState(g_menu_id, g_automenu, &state);
+	if (state == xplm_Menu_Unchecked)
+	{
+		XPLMEnableMenuItem(g_menu_id, g_menu_connect, 0);
+		XPLMCheckMenuItem(g_menu_id, g_automenu, xplm_Menu_Checked);
+		g_automaticBehavior = 1;
+	}
+	else if (state == xplm_Menu_Checked)
+	{
+		XPLMEnableMenuItem(g_menu_id, g_menu_connect, 1);
+		XPLMCheckMenuItem(g_menu_id, g_automenu, xplm_Menu_Unchecked);
+		g_automaticBehavior = 0;
+	}
+
+	// Save settings
+	save_settings_to_file();
+}
+
+int automatic_behavior_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon)
+{
+	process_automatic_behavior();
+	return 0;
+}
+
+int connection_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon)
+{
+	process_connection();
+	return 0;
+}
+
+int save_settings_to_file()
+{
+	
+	char buffer[PATH_MAX], *c;
+	XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
+	posixify(buffer);
+	if (!(c = strrchr(buffer, '/'))) return xplog("Can't find my plugin");
+	*(c + 1) = '\0';
+	if (!strcmp(c - 3, "/32/") || !strcmp(c - 3, "/64/")) { *(c - 2) = '\0'; }	/* plugins one level down on some builds, so go up */
+	strcat(buffer, "settings.txt");
+	FILE *fp = fopen(buffer, "w+");
+	if (!fp) return xplog("Can't open setting file.");
+	// writeback settings
+	fprintf(fp, "automatic:%i", g_automaticBehavior);
+	fclose(fp);
+	return 0;
+}
+
+int load_settings_from_file()
+{
+	/* Locate settings file */
+	char buffer[PATH_MAX], *c;
+	XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
+	posixify(buffer);
+	if (!(c = strrchr(buffer, '/'))) return xplog("Can't find my plugin");
+	*(c + 1) = '\0';
+	if (!strcmp(c - 3, "/32/") || !strcmp(c - 3, "/64/")) { *(c - 2) = '\0'; }	/* plugins one level down on some builds, so go up */
+	strcat(buffer, "settings.txt");
+	FILE *fp = fopen(buffer, "r");
+	if (!fp)
+	{
+		g_automaticBehavior = 1;
+		return xplog("Can't open setting file.");
+	}
+
+	char buff[12]; // automatic:0
+	fscanf(fp, "%s", buff);
+	xplog("loading settings");
+	xplog(buff);
+	if (!strcmp(buff, "automatic:0"))
+	{
+		g_automaticBehavior = 0;
+		xplog("automatic behavior disabled");
+	}
+	else
+	{
+		g_automaticBehavior = 1;
+		xplog("automatic behavior enabled");
+	}
+	fclose(fp);
+
+	return 0;
+}
 
 #ifdef DEBUG
 static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
