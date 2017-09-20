@@ -108,3 +108,12 @@ typedef struct {
     const char *key;
     const int type;
 } icao_t;
+
+/* Autogate X-Plane Menu*/
+void menu_handler(void *, void *);
+void process_automatic_behavior();
+void process_connection();
+int  automatic_behavior_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon);
+int  connection_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon);
+int save_settings_to_file();
+int load_settings_from_file();

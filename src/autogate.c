@@ -165,6 +165,16 @@ static char canonical[16][5] = {
     "APRH",
 };
 
+/* Autogate X-Plane Menu*/
+
+int g_menu_container_idx; // The index of our menu item in the Plugins menu
+int g_automenu;
+int g_menu_connect;
+int g_automaticBehavior;
+XPLMMenuID g_menu_id; // The menu container we'll append all our menu items to
+
+XPLMCommandRef ToggleConnectionCmd = NULL;	//  Our two custom commands
+XPLMCommandRef AutomaticAutoGateCmd = NULL;
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
@@ -242,6 +252,35 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     XPLMRegisterFlightLoopCallback(alertcallback, 0, NULL);
     XPLMRegisterFlightLoopCallback(newplanecallback, 0, NULL);		/* For checking gate alignment on new location */
 
+
+   	/* Add menu */
+
+	g_menu_container_idx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "AutoGate", 0, 0);
+	g_menu_id = XPLMCreateMenu("AutoGate", XPLMFindPluginsMenu(), g_menu_container_idx, menu_handler, NULL);
+	g_menu_connect = XPLMAppendMenuItem(g_menu_id, "Connect/Disconnect Gate", (void *)"Menu Item 1", 1);
+	XPLMAppendMenuSeparator(g_menu_id);
+	g_automenu = XPLMAppendMenuItem(g_menu_id, "Automatic Autogate", (void *)"Menu Item 2", 1);
+
+	// load previous state
+	load_settings_from_file();
+	XPLMMenuCheck check = xplm_Menu_Checked;
+	int enableCon = 0;
+	if (!g_automaticBehavior)
+	{
+		check = xplm_Menu_Unchecked;
+		enableCon = 1;
+	}
+	
+	XPLMCheckMenuItem(g_menu_id, g_automenu, check);
+	XPLMEnableMenuItem(g_menu_id, g_menu_connect, enableCon);
+	
+
+	AutomaticAutoGateCmd = XPLMCreateCommand("AutoGate/toggle_automatic", "Toggle automatic behavior");
+	ToggleConnectionCmd = XPLMCreateCommand("AutoGate/connect_disconnect", "Connect/Disconnect jetway");
+
+	XPLMRegisterCommandHandler(AutomaticAutoGateCmd, automatic_behavior_handler, 1, NULL);
+	XPLMRegisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL); 
+
     return 1;
 }
 
@@ -252,6 +291,12 @@ PLUGIN_API void XPluginStop(void)
     XPLMUnregisterFlightLoopCallback(alertcallback, NULL);
     XPLMUnregisterFlightLoopCallback(initsoundcallback, NULL);
     closesound();
+    
+	XPLMDestroyMenu(g_menu_id);
+    
+    XPLMUnregisterCommandHandler(AutomaticAutoGateCmd, automatic_behavior_handler, 1, NULL);
+    XPLMUnregisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL);
+
 }
 
 PLUGIN_API int XPluginEnable(void)
@@ -600,7 +645,9 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
     int locgood=(fabsf(local_x)<=AZI_X && fabsf(local_z)<=GOOD_Z);
 	
     XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
-    running |= (XPLMGetDataf(ref_parkingbrake) < 0.5f);
+    int pbrake = (XPLMGetDataf(ref_parkingbrake) < 0.5f);
+    if (g_automaticBehavior)
+    running |= pbrake;
 
     status=id1=id2=id3=id4=lr=track=0;
     azimuth=distance=distance2=0;
@@ -674,8 +721,11 @@ static void updaterefs(float now, float local_x, float local_y, float local_z)
         }
         else
         {
-            state=ENGAGE;
-            timestamp=now;
+			if (g_automaticBehavior)
+			{
+				state = ENGAGE;
+				timestamp = now;
+			}
         }
         break;
 
@@ -785,6 +835,125 @@ int xplog(char *msg)
     return 0;
 }
 
+void menu_handler(void * in_menu_ref, void * in_item_ref)
+{
+	if (!strcmp((const char *)in_item_ref, "Menu Item 1"))
+	{
+		process_connection();
+	}
+	else if (!strcmp((const char *)in_item_ref, "Menu Item 2"))
+	{
+		process_automatic_behavior();
+	}
+}
+
+void process_connection()
+{
+	if (g_automaticBehavior)
+		return;
+
+	// do stuff
+	float now = XPLMGetDataf(ref_total_running_time_sec);
+	if (state == GOOD || state == DISENGAGED)
+	{
+
+		timestamp = now;
+		state = ENGAGE;
+	}
+	else if (state == DOCKED)
+	{
+		timestamp = now;
+		state = DISENGAGE;
+	}
+	// TODO: ADD Message box 
+}
+
+void process_automatic_behavior()
+{
+	XPLMMenuCheck state;
+	XPLMCheckMenuItemState(g_menu_id, g_automenu, &state);
+	if (state == xplm_Menu_Unchecked)
+	{
+		XPLMEnableMenuItem(g_menu_id, g_menu_connect, 0);
+		XPLMCheckMenuItem(g_menu_id, g_automenu, xplm_Menu_Checked);
+		g_automaticBehavior = 1;
+	}
+	else if (state == xplm_Menu_Checked)
+	{
+		XPLMEnableMenuItem(g_menu_id, g_menu_connect, 1);
+		XPLMCheckMenuItem(g_menu_id, g_automenu, xplm_Menu_Unchecked);
+		g_automaticBehavior = 0;
+	}
+
+	// Save settings
+	save_settings_to_file();
+}
+
+int automatic_behavior_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon)
+{
+	process_automatic_behavior();
+	return 0;
+}
+
+int connection_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon)
+{
+	process_connection();
+	return 0;
+}
+
+int save_settings_to_file()
+{
+	
+	char buffer[PATH_MAX], *c;
+	XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
+	posixify(buffer);
+	if (!(c = strrchr(buffer, '/'))) return xplog("Can't find my plugin");
+	*(c + 1) = '\0';
+	if (!strcmp(c - 3, "/32/") || !strcmp(c - 3, "/64/")) { *(c - 2) = '\0'; }	/* plugins one level down on some builds, so go up */
+	strcat(buffer, "settings.txt");
+	FILE *fp = fopen(buffer, "w+");
+	if (!fp) return xplog("Can't open setting file.");
+	// writeback settings
+	fprintf(fp, "automatic:%i", g_automaticBehavior);
+	fclose(fp);
+	return 0;
+}
+
+int load_settings_from_file()
+{
+	/* Locate settings file */
+	char buffer[PATH_MAX], *c;
+	XPLMGetPluginInfo(XPLMGetMyID(), NULL, buffer, NULL, NULL);
+	posixify(buffer);
+	if (!(c = strrchr(buffer, '/'))) return xplog("Can't find my plugin");
+	*(c + 1) = '\0';
+	if (!strcmp(c - 3, "/32/") || !strcmp(c - 3, "/64/")) { *(c - 2) = '\0'; }	/* plugins one level down on some builds, so go up */
+	strcat(buffer, "settings.txt");
+	FILE *fp = fopen(buffer, "r");
+	if (!fp)
+	{
+		g_automaticBehavior = 1;
+		return xplog("Can't open setting file.");
+	}
+
+	char buff[12]; // automatic:0
+	fscanf(fp, "%s", buff);
+	xplog("loading settings");
+	xplog(buff);
+	if (!strcmp(buff, "automatic:0"))
+	{
+		g_automaticBehavior = 0;
+		xplog("automatic behavior disabled");
+	}
+	else
+	{
+		g_automaticBehavior = 1;
+		xplog("automatic behavior enabled");
+	}
+	fclose(fp);
+
+	return 0;
+}
 
 #ifdef DEBUG
 static void drawdebug(XPLMWindowID inWindowID, void *inRefcon)
