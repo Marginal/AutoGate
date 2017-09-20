@@ -252,7 +252,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     XPLMRegisterFlightLoopCallback(alertcallback, 0, NULL);
     XPLMRegisterFlightLoopCallback(newplanecallback, 0, NULL);		/* For checking gate alignment on new location */
 
-    /* Add menu */
+
+   	/* Add menu */
 
 	g_menu_container_idx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "AutoGate", 0, 0);
 	g_menu_id = XPLMCreateMenu("AutoGate", XPLMFindPluginsMenu(), g_menu_container_idx, menu_handler, NULL);
@@ -278,7 +279,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 	ToggleConnectionCmd = XPLMCreateCommand("AutoGate/connect_disconnect", "Connect/Disconnect jetway");
 
 	XPLMRegisterCommandHandler(AutomaticAutoGateCmd, automatic_behavior_handler, 1, NULL);
-	XPLMRegisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL);
+	XPLMRegisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL); 
 
     return 1;
 }
@@ -290,6 +291,12 @@ PLUGIN_API void XPluginStop(void)
     XPLMUnregisterFlightLoopCallback(alertcallback, NULL);
     XPLMUnregisterFlightLoopCallback(initsoundcallback, NULL);
     closesound();
+    
+	XPLMDestroyMenu(g_menu_id);
+    
+    XPLMUnregisterCommandHandler(AutomaticAutoGateCmd, automatic_behavior_handler, 1, NULL);
+    XPLMUnregisterCommandHandler(ToggleConnectionCmd, connection_handler, 1, NULL);
+
 }
 
 PLUGIN_API int XPluginEnable(void)
@@ -634,174 +641,173 @@ static int localpos(float object_x, float object_y, float object_z, float object
 /* Update published data used by gate and dgs */
 static void updaterefs(float now, float local_x, float local_y, float local_z)
 {
-	int running;
-	int pbrake;
-	int locgood = (fabsf(local_x) <= AZI_X && fabsf(local_z) <= GOOD_Z);
+    int running;
+    int locgood=(fabsf(local_x)<=AZI_X && fabsf(local_z)<=GOOD_Z);
+	
+    XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
+    int pbrake = (XPLMGetDataf(ref_parkingbrake) < 0.5f);
+    if (g_automaticBehavior)
+    running |= pbrake;
 
-	XPLMGetDatavi(ref_ENGN_running, &running, 0, 1);
-	pbrake = (XPLMGetDataf(ref_parkingbrake) < 0.5f);
-	if (g_automaticBehavior)
-		running |= pbrake;
+    status=id1=id2=id3=id4=lr=track=0;
+    azimuth=distance=distance2=0;
 
-	status = id1 = id2 = id3 = id4 = lr = track = 0;
-	azimuth = distance = distance2 = 0;
+    switch (state)
+    {
+    case IDFAIL:
+        lr=3;	/* Stop */
+        status=5;
+        break;
 
-	switch (state)
-	{
-	case IDFAIL:
-		lr = 3;	/* Stop */
-		status = 5;
-		break;
+    case TRACK:
+        if (locgood)
+        {
+            state=GOOD;
+            timestamp=now;
+        }
+        else if (local_z<-GOOD_Z)
+            state=BAD;
+        else
+        {
+            status=1;	/* plane id */
+            if (plane_type<4)
+                id1=plane_type+1;
+            else if (plane_type<8)
+                id2=plane_type-3;
+            else if (plane_type<12)
+                id3=plane_type-7;
+            else
+                id4=plane_type-11;
+            if (local_z-GOOD_Z > AZI_Z ||
+                fabsf(local_x) > AZI_X)
+                track=1;	/* lead-in only */
+            else
+            {
+                distance=((float)((int)((local_z - GOOD_Z)*2))) / 2;
+                azimuth=((float)((int)(local_x*2))) / 2;
+                if (azimuth>4)	azimuth=4;
+                if (azimuth<-4) azimuth=-4;
+                if (azimuth<=-0.5f)
+                    lr=1;
+                else if (azimuth>=0.5f)
+                    lr=2;
+                else
+                    lr=0;
+                if (local_z-GOOD_Z <= REM_Z/2)
+                {
+                    track=3;
+                    distance2=distance;
+                }
+                else
+                {
+                    if (local_z-GOOD_Z > REM_Z)
+                        /* azimuth only */
+                        distance=REM_Z;
+                    track=2;
+                    distance2=distance - REM_Z/2;
+                }
+            }
+        }
+        break;
 
-	case TRACK:
-		if (locgood)
-		{
-			state = GOOD;
-			timestamp = now;
-		}
-		else if (local_z<-GOOD_Z)
-			state = BAD;
-		else
-		{
-			status = 1;	/* plane id */
-			if (plane_type<4)
-				id1 = plane_type + 1;
-			else if (plane_type<8)
-				id2 = plane_type - 3;
-			else if (plane_type<12)
-				id3 = plane_type - 7;
-			else
-				id4 = plane_type - 11;
-			if (local_z - GOOD_Z > AZI_Z ||
-				fabsf(local_x) > AZI_X)
-				track = 1;	/* lead-in only */
-			else
-			{
-				distance = ((float)((int)((local_z - GOOD_Z) * 2))) / 2;
-				azimuth = ((float)((int)(local_x * 2))) / 2;
-				if (azimuth>4)	azimuth = 4;
-				if (azimuth<-4) azimuth = -4;
-				if (azimuth <= -0.5f)
-					lr = 1;
-				else if (azimuth >= 0.5f)
-					lr = 2;
-				else
-					lr = 0;
-				if (local_z - GOOD_Z <= REM_Z / 2)
-				{
-					track = 3;
-					distance2 = distance;
-				}
-				else
-				{
-					if (local_z - GOOD_Z > REM_Z)
-						/* azimuth only */
-						distance = REM_Z;
-					track = 2;
-					distance2 = distance - REM_Z / 2;
-				}
-			}
-		}
-		break;
-
-	case GOOD:
-		if (!locgood)
-			state = TRACK;
-		else if (running)
-		{
-			/* Stop */
-			lr = 3;
-			status = 2;
-		}
-		else
-		{
+    case GOOD:
+        if (!locgood)
+            state=TRACK;
+        else if (running)
+        {
+            /* Stop */
+            lr=3;
+            status=2;
+        }
+        else
+        {
 			if (g_automaticBehavior)
 			{
 				state = ENGAGE;
 				timestamp = now;
 			}
-		}
-		break;
+        }
+        break;
 
-	case BAD:
-		if (local_z >= -GOOD_Z)
-			state = TRACK;
-		else
-		{
-			/* Too far */
-			lr = 3;
-			status = 4;
-		}
-		break;
+    case BAD:
+        if (local_z>=-GOOD_Z)
+            state=TRACK;
+        else
+        {
+            /* Too far */
+            lr=3;
+            status=4;
+        }
+        break;
 
-	case ENGAGE:
-		lr = 3;
-		if (running)
-		{
-			/* abort - reverse animation */
-			state = DISENGAGE;
-			timestamp = now - (timestamp + WAITTIME + DURATION - now);
-		}
-		else if (now>timestamp + WAITTIME + DURATION)
-			state = DOCKED;
-		else if (now>timestamp + WAITTIME)
-		{
-			float ratio = (now - (timestamp + WAITTIME)) / DURATION;
-			status = 3;	/* OK */
-			lat = (door_x - OBJ_X) * ratio;
-			vert = (local_y - OBJ_Y) * ratio;
-			if (!moving && gate_autogate) playalert();
-			moving = 1;
-		}
-		else
-			status = 2;	/* Stop */
-		break;
+    case ENGAGE:
+        lr=3;
+        if (running)
+        {
+            /* abort - reverse animation */
+            state=DISENGAGE;
+            timestamp=now-(timestamp+WAITTIME+DURATION-now);
+        }
+        else if (now>timestamp+WAITTIME+DURATION)
+            state=DOCKED;
+        else if (now>timestamp+WAITTIME)
+        {
+            float ratio=(now-(timestamp+WAITTIME))/DURATION;
+            status=3;	/* OK */
+            lat =(door_x-OBJ_X) * ratio;
+            vert=(local_y-OBJ_Y) * ratio;
+            if (!moving && gate_autogate) playalert();
+            moving=1;
+        }
+        else
+            status=2;	/* Stop */
+        break;
 
-	case DOCKED:
-		/* Blank */
-		if (running)
-		{
-			state = DISENGAGE;
-			timestamp = now;
-		}
-		else
-		{
-			lat = door_x - OBJ_X;
-			vert = local_y - OBJ_Y;
-			moving = 0;
-			stopalert();
-		}
-		break;
+    case DOCKED:
+        /* Blank */
+        if (running)
+        {
+            state=DISENGAGE;
+            timestamp=now;
+        }
+        else
+        {
+            lat =door_x-OBJ_X;
+            vert=local_y-OBJ_Y;
+            moving=0;
+            stopalert();
+        }
+        break;
 
-	case DISENGAGE:
-		/* Blank */
-		if (now>timestamp + DURATION)
-		{
-			state = DISENGAGED;
-			lat = vert = moving = 0;
-			stopalert();
-		}
-		else
-		{
-			float ratio = 1 - (now - timestamp) / DURATION;
-			lat = (door_x - OBJ_X) * ratio;
-			vert = (local_y - OBJ_Y) * ratio;
-			if (!moving && gate_autogate) playalert();
-			moving = 1;
-		}
-		break;
+    case DISENGAGE:
+        /* Blank */
+        if (now>timestamp+DURATION)
+        {
+            state=DISENGAGED;
+            lat=vert=moving=0;
+            stopalert();
+        }
+        else
+        {
+            float ratio=1 - (now-timestamp)/DURATION;
+            lat =(door_x-OBJ_X) * ratio;
+            vert=(local_y-OBJ_Y) * ratio;
+            if (!moving && gate_autogate) playalert();
+            moving=1;
+        }
+        break;
 
-	case DISENGAGED:
-		/* Blank */
-		if (local_z - GOOD_Z > AZI_Z || fabsf(local_x) > AZI_X)
-			/* Go back to lead-in */
-			state = TRACK;
-		break;
+    case DISENGAGED:
+        /* Blank */
+        if (local_z-GOOD_Z > AZI_Z || fabsf(local_x) > AZI_X)
+            /* Go back to lead-in */
+            state=TRACK;
+        break;
 
-	default:
-		/* Shouldn't be here if state<=IDLE */
-		assert(0);
-	}
+    default:
+        /* Shouldn't be here if state<=IDLE */
+        assert(0);
+    }
 }
 
 static XPLMDataRef floatref(char *inDataName, XPLMGetDataf_f inReadFloat, float *inRefcon)

@@ -40,7 +40,6 @@
 #include "XPLMPlugin.h"
 #include "XPLMProcessing.h"
 #include "XPLMUtilities.h"
-#include "XPLMMenus.h"
 
 
 /* Constants */
