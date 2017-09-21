@@ -40,7 +40,7 @@
 #include "XPLMPlugin.h"
 #include "XPLMProcessing.h"
 #include "XPLMUtilities.h"
-
+#include "XPLMMenus.h"
 
 /* Constants */
 static const float F2M=0.3048;	/* 1 ft [m] */
